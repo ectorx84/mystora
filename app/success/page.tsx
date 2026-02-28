@@ -1,8 +1,8 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function Success() {
+function SuccessContent() {
   const searchParams = useSearchParams();
   const prenom = searchParams.get('prenom') || '';
   const date = searchParams.get('date') || '';
@@ -18,7 +18,7 @@ export default function Success() {
       fetch('/api/rapport', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, dateNaissance: date }),
+        body: JSON.stringify({ prenom, dateNaissance: date, email }),
       })
         .then((res) => res.json())
         .then((data) => {
@@ -91,5 +91,17 @@ export default function Success() {
 
       <p className="text-gray-500 text-sm mt-6">Divertissement</p>
     </main>
+  );
+}
+
+export default function Success() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-[#1E1B4B] flex items-center justify-center">
+        <p className="text-[#D4A574] text-xl animate-pulse">✨ Chargement...</p>
+      </main>
+    }>
+      <SuccessContent />
+    </Suspense>
   );
 }
