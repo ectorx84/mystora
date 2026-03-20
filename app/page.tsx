@@ -20,6 +20,24 @@ export default function Home() {
   const [step, setStep] = useState<'form' | 'loading' | 'result'>('form');
   const [loadingIdx, setLoadingIdx] = useState(0);
   const [payLoading, setPayLoading] = useState(false);
+  const [blocked, setBlocked] = useState(false);
+  const [timeLeft, setTimeLeft] = useState('');
+
+  // Check 24h limit on mount
+  useEffect(() => {
+    const lastTest = localStorage.getItem('mystora_last_test');
+    if (lastTest) {
+      const elapsed = Date.now() - parseInt(lastTest);
+      const limit = 24 * 60 * 60 * 1000;
+      if (elapsed < limit) {
+        setBlocked(true);
+        const remaining = limit - elapsed;
+        const h = Math.floor(remaining / 3600000);
+        const m = Math.floor((remaining % 3600000) / 60000);
+        setTimeLeft(`${h}h${m.toString().padStart(2, '0')}`);
+      }
+    }
+  }, []);
 
   const moisRef = useRef<HTMLInputElement>(null);
   const anneeRef = useRef<HTMLInputElement>(null);
@@ -57,7 +75,7 @@ export default function Home() {
   }, [step]);
 
   const handleSubmit = async () => {
-    if (!prenom || !dateNaissance) return;
+    if (!prenom || !dateNaissance || blocked) return;
     setStep('loading');
     setLoadingIdx(0);
     setResultat('');
@@ -71,6 +89,9 @@ export default function Home() {
       const data = await res.json();
       setResultat(data.resultat);
       setStep('result');
+      // Save timestamp for 24h limit
+      localStorage.setItem('mystora_last_test', Date.now().toString());
+      setBlocked(true);
     } catch {
       setStep('form');
     }
@@ -106,7 +127,7 @@ export default function Home() {
           <>
             <div className="text-center mb-6">
               <h1 className="text-4xl font-bold text-white tracking-tight">🔮 Mystora</h1>
-              <p className="text-[#D4A574] text-base mt-2 font-medium">Voyance mystique nouvelle génération</p>
+              <p className="text-[#D4A574] text-base mt-2 font-medium">Voyance mystique personnalisée</p>
               <p className="text-gray-400 text-sm mt-1 max-w-xs mx-auto">Une lecture personnalisée d&apos;une précision jamais vue. Entre ton prénom et laisse les astres parler.</p>
               <p className="text-gray-500 text-xs mt-1">✨ Gratuit et immédiat</p>
             </div>
@@ -167,11 +188,15 @@ export default function Home() {
                   className="w-full bg-[#0F0D2E] text-white placeholder-gray-500 rounded-xl px-4 py-3 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-sm resize-none"
                 />
                 <button onClick={handleSubmit}
-                  disabled={!prenom || !dateNaissance}
+                  disabled={!prenom || !dateNaissance || blocked}
                   className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-600 text-white font-bold py-3.5 rounded-xl transition-all duration-300 mt-2 disabled:opacity-50 text-lg shadow-lg shadow-purple-900/30">
-                  ✨ Recevoir mon message
+                  {blocked ? `🕐 Prochain test gratuit dans ${timeLeft}` : '✨ Recevoir mon message'}
                 </button>
-                <p className="text-gray-500 text-xs text-center">Sans carte bancaire • Résultat immédiat</p>
+                {blocked ? (
+                  <p className="text-amber-200/70 text-xs text-center">Tu as déjà utilisé ton test gratuit. Reviens dans {timeLeft} ou débloque ton rapport complet maintenant.</p>
+                ) : (
+                  <p className="text-gray-500 text-xs text-center">Sans carte bancaire • Résultat immédiat</p>
+                )}
               </div>
             </div>
           </>
@@ -237,6 +262,32 @@ export default function Home() {
               <div className="flex items-center justify-center gap-4 mt-3 text-gray-400 text-xs">
                 <span>🔒 Paiement sécurisé</span>
                 <span>⚡ Résultat instantané</span>
+              </div>
+            </div>
+
+            {/* Avis clients */}
+            <div className="mt-4 flex flex-col gap-3">
+              <p className="text-gray-400 text-xs text-center">Ce qu&apos;ils en disent</p>
+              <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-amber-400 text-sm">★★★★★</span>
+                  <span className="text-white text-sm font-medium">Sarah M.</span>
+                </div>
+                <p className="text-gray-300 text-sm leading-relaxed">&quot;J&apos;ai eu des frissons en lisant mon rapport. Il a décrit exactement ce que je traverse en ce moment avec mon ex. Le chemin de vie était tellement précis que j&apos;en suis restée bouche bée.&quot;</p>
+              </div>
+              <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-amber-400 text-sm">★★★★★</span>
+                  <span className="text-white text-sm font-medium">Karim L.</span>
+                </div>
+                <p className="text-gray-300 text-sm leading-relaxed">&quot;Au début je pensais que c&apos;était du blabla mais quand j&apos;ai lu la partie sur ma carrière et mon année personnelle... tout colle. J&apos;ai même partagé avec ma copine, elle a halluciné aussi.&quot;</p>
+              </div>
+              <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-amber-400 text-sm">★★★★★</span>
+                  <span className="text-white text-sm font-medium">Fatou D.</span>
+                </div>
+                <p className="text-gray-300 text-sm leading-relaxed">&quot;4,90€ pour un rapport aussi complet c&apos;est donné. Ma voyante me prend 50€ pour me dire la même chose en moins détaillé. Je recommande à 100%.&quot;</p>
               </div>
             </div>
 
