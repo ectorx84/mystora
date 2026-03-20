@@ -190,10 +190,10 @@ export default function Home() {
                 <button onClick={handleSubmit}
                   disabled={!prenom || !dateNaissance || blocked}
                   className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-600 text-white font-bold py-3.5 rounded-xl transition-all duration-300 mt-2 disabled:opacity-50 text-lg shadow-lg shadow-purple-900/30">
-                  {blocked ? `🕐 Prochain test gratuit dans ${timeLeft}` : '✨ Recevoir mon message'}
+                  {blocked ? '🔒 Test gratuit utilisé' : '✨ Recevoir mon message'}
                 </button>
                 {blocked ? (
-                  <p className="text-amber-200/70 text-xs text-center">Tu as déjà utilisé ton test gratuit. Reviens dans {timeLeft} ou débloque ton rapport complet maintenant.</p>
+                  <p className="text-amber-200/70 text-xs text-center">Tu as déjà utilisé ton test gratuit. Débloque ton rapport complet maintenant.</p>
                 ) : (
                   <p className="text-gray-500 text-xs text-center">Sans carte bancaire • Résultat immédiat</p>
                 )}
