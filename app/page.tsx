@@ -82,7 +82,7 @@ export default function Home() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, dateNaissance, email: '' }),
+        body: JSON.stringify({ prenom, dateNaissance, email: '', question: question.trim() || quickTopic || '' }),
       });
       const data = await res.json();
       window.location.href = data.url;

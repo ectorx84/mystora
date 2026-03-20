@@ -5,7 +5,9 @@ import { put } from '@vercel/blob';
 const client = new Anthropic();
 
 export async function POST(request: NextRequest) {
-  const { prenom, dateNaissance, email } = await request.json();
+  const { prenom, dateNaissance, email, question } = await request.json();
+
+  const questionContext = question ? `\n\nIMPORTANT : La personne a posé cette question : "${question}". Commence le rapport en répondant directement à cette question de manière détaillée et personnalisée, PUIS enchaîne avec le profil complet.` : '';
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
@@ -26,7 +28,7 @@ RÈGLES ABSOLUES à respecter :
     messages: [
       {
         role: 'user',
-        content: `Génère un rapport astrologique complet et détaillé pour ${prenom}, né(e) le ${dateNaissance}.
+        content: `Génère un rapport astrologique complet et détaillé pour ${prenom}, né(e) le ${dateNaissance}.${questionContext}
 
 Le rapport doit inclure :
 1. Profil de personnalité complet (signe solaire, élément, planète dominante)

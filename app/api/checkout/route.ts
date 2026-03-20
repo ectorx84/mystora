@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: NextRequest) {
-  const { prenom, dateNaissance, email } = await request.json();
+  const { prenom, dateNaissance, email, question } = await request.json();
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card'],
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       },
     ],
     mode: 'payment',
-    success_url: `${process.env.NEXT_PUBLIC_URL}/success?prenom=${prenom}&date=${dateNaissance}&email=${email}`,
+    success_url: `${process.env.NEXT_PUBLIC_URL}/success?prenom=${encodeURIComponent(prenom)}&date=${encodeURIComponent(dateNaissance)}&email=${encodeURIComponent(email || '')}&question=${encodeURIComponent(question || '')}`,
     cancel_url: `${process.env.NEXT_PUBLIC_URL}/`,
   });
 

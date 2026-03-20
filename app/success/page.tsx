@@ -7,6 +7,7 @@ function SuccessContent() {
   const prenom = searchParams.get('prenom') || '';
   const date = searchParams.get('date') || '';
   const email = searchParams.get('email') || '';
+  const question = searchParams.get('question') || '';
   const [rapport, setRapport] = useState('');
   const [loading, setLoading] = useState(true);
   const [emailEnvoye, setEmailEnvoye] = useState(false);
@@ -18,7 +19,7 @@ function SuccessContent() {
       fetch('/api/rapport', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, dateNaissance: date, email }),
+        body: JSON.stringify({ prenom, dateNaissance: date, email, question }),
       })
         .then((res) => res.json())
         .then((data) => {
