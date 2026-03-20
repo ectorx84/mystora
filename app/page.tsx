@@ -15,6 +15,8 @@ export default function Home() {
   const [mois, setMois] = useState('');
   const [annee, setAnnee] = useState('');
   const [resultat, setResultat] = useState('');
+  const [question, setQuestion] = useState('');
+  const [quickTopic, setQuickTopic] = useState('');
   const [step, setStep] = useState<'form' | 'loading' | 'result'>('form');
   const [loadingIdx, setLoadingIdx] = useState(0);
   const [payLoading, setPayLoading] = useState(false);
@@ -60,10 +62,11 @@ export default function Home() {
     setLoadingIdx(0);
     setResultat('');
     try {
+      const sujet = question.trim() || quickTopic || '';
       const res = await fetch('/api/astro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, dateNaissance }),
+        body: JSON.stringify({ prenom, dateNaissance, question: sujet }),
       });
       const data = await res.json();
       setResultat(data.resultat);
@@ -132,6 +135,36 @@ export default function Home() {
                       className="bg-[#0F0D2E] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-2/4 text-center text-lg font-semibold transition-colors" />
                   </div>
                 </div>
+                {/* Quick Topics */}
+                <div>
+                  <label className="text-gray-400 text-xs px-1 mb-1.5 block">Ta question concerne...</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { emoji: '❤️', label: 'Amour', value: 'amour et relations' },
+                      { emoji: '💼', label: 'Travail', value: 'carrière et travail' },
+                      { emoji: '🔓', label: 'Blocages', value: 'blocages et obstacles' },
+                      { emoji: '✨', label: 'Avenir', value: 'ce qui m\'attend' },
+                    ].map(t => (
+                      <button key={t.value} type="button"
+                        onClick={() => { setQuickTopic(t.value); setQuestion(''); }}
+                        className={`py-2.5 px-3 rounded-xl text-sm font-medium transition-all duration-200 border ${
+                          quickTopic === t.value
+                            ? 'bg-purple-700/50 border-amber-400/50 text-amber-200'
+                            : 'bg-[#0F0D2E] border-purple-700/30 text-gray-300 hover:border-purple-500/50'
+                        }`}>
+                        {t.emoji} {t.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* Question libre */}
+                <textarea
+                  placeholder="Ou écris ta question ici... (optionnel)"
+                  value={question}
+                  onChange={e => { setQuestion(e.target.value); if (e.target.value.trim()) setQuickTopic(''); }}
+                  rows={2}
+                  className="w-full bg-[#0F0D2E] text-white placeholder-gray-500 rounded-xl px-4 py-3 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-sm resize-none"
+                />
                 <button onClick={handleSubmit}
                   disabled={!prenom || !dateNaissance}
                   className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-600 text-white font-bold py-3.5 rounded-xl transition-all duration-300 mt-2 disabled:opacity-50 text-lg shadow-lg shadow-purple-900/30">
