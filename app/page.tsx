@@ -106,12 +106,13 @@ export default function Home() {
           <>
             <div className="text-center mb-6">
               <h1 className="text-4xl font-bold text-white tracking-tight">🔮 Mystora</h1>
-              <p className="text-[#D4A574] text-base mt-1">Les réponses que tu cherches sont ici...</p>
-              <p className="text-gray-500 text-sm mt-0.5">Gratuit et immédiat</p>
+              <p className="text-[#D4A574] text-base mt-2 font-medium">Voyance mystique nouvelle génération</p>
+              <p className="text-gray-400 text-sm mt-1 max-w-xs mx-auto">Une lecture personnalisée d&apos;une précision jamais vue. Entre ton prénom et laisse les astres parler.</p>
+              <p className="text-gray-500 text-xs mt-1">✨ Gratuit et immédiat</p>
             </div>
 
             <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-7 w-full max-w-md shadow-2xl border border-purple-500/10">
-              <h2 className="text-white text-xl font-semibold text-center mb-6">Découvre ton message</h2>
+              <h2 className="text-white text-xl font-semibold text-center mb-6">Pose ta question aux astres</h2>
               <div className="flex flex-col gap-4">
                 <input
                   type="text"
