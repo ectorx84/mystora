@@ -3,32 +3,156 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const client = new Anthropic();
 
+// ============ VRAIS CALCULS ASTRO/NUMÉROLOGIE ============
+
+function getZodiac(day: number, month: number) {
+  const signs = [
+    { name: 'Capricorne', element: 'Terre', modalite: 'Cardinal', planete: 'Saturne', start: [12,22], end: [1,19] },
+    { name: 'Verseau', element: 'Air', modalite: 'Fixe', planete: 'Uranus', start: [1,20], end: [2,18] },
+    { name: 'Poissons', element: 'Eau', modalite: 'Mutable', planete: 'Neptune', start: [2,19], end: [3,20] },
+    { name: 'Bélier', element: 'Feu', modalite: 'Cardinal', planete: 'Mars', start: [3,21], end: [4,19] },
+    { name: 'Taureau', element: 'Terre', modalite: 'Fixe', planete: 'Vénus', start: [4,20], end: [5,20] },
+    { name: 'Gémeaux', element: 'Air', modalite: 'Mutable', planete: 'Mercure', start: [5,21], end: [6,20] },
+    { name: 'Cancer', element: 'Eau', modalite: 'Cardinal', planete: 'Lune', start: [6,21], end: [7,22] },
+    { name: 'Lion', element: 'Feu', modalite: 'Fixe', planete: 'Soleil', start: [7,23], end: [8,22] },
+    { name: 'Vierge', element: 'Terre', modalite: 'Mutable', planete: 'Mercure', start: [8,23], end: [9,22] },
+    { name: 'Balance', element: 'Air', modalite: 'Cardinal', planete: 'Vénus', start: [9,23], end: [10,22] },
+    { name: 'Scorpion', element: 'Eau', modalite: 'Fixe', planete: 'Pluton', start: [10,23], end: [11,21] },
+    { name: 'Sagittaire', element: 'Feu', modalite: 'Mutable', planete: 'Jupiter', start: [11,22], end: [12,21] },
+  ];
+  for (const s of signs) {
+    if (s.start[0] === s.end[0]) {
+      if (month === s.start[0] && day >= s.start[1] && day <= s.end[1]) return s;
+    } else if (s.start[0] === 12 && s.end[0] === 1) {
+      if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return s;
+    } else {
+      if ((month === s.start[0] && day >= s.start[1]) || (month === s.end[0] && day <= s.end[1])) return s;
+    }
+  }
+  return signs[0];
+}
+
+function getDecan(day: number, month: number) {
+  const zodiac = getZodiac(day, month);
+  const signs = ['Bélier','Taureau','Gémeaux','Cancer','Lion','Vierge','Balance','Scorpion','Sagittaire','Capricorne','Verseau','Poissons'];
+  const idx = signs.indexOf(zodiac.name);
+  // Approximate decan by day within sign
+  const startDays = [21,20,21,21,23,23,23,23,22,22,20,22];
+  const signStart = startDays[idx] || 21;
+  const dayInSign = day >= signStart ? day - signStart : day + 10;
+  if (dayInSign < 10) return { num: 1, influence: signs[idx] };
+  if (dayInSign < 20) return { num: 2, influence: signs[(idx + 4) % 12] };
+  return { num: 3, influence: signs[(idx + 8) % 12] };
+}
+
+function reduceToSingle(n: number): number {
+  while (n > 9 && n !== 11 && n !== 22 && n !== 33) {
+    let sum = 0;
+    for (const d of String(n)) sum += parseInt(d);
+    n = sum;
+  }
+  return n;
+}
+
+function getLifePath(day: number, month: number, year: number): number {
+  const d = reduceToSingle(day);
+  const m = reduceToSingle(month);
+  const y = reduceToSingle(Array.from(String(year)).reduce((s, c) => s + parseInt(c), 0));
+  return reduceToSingle(d + m + y);
+}
+
+function getExpressionNumber(prenom: string): number {
+  const table: Record<string, number> = {a:1,b:2,c:3,d:4,e:5,f:6,g:7,h:8,i:9,j:1,k:2,l:3,m:4,n:5,o:6,p:7,q:8,r:9,s:1,t:2,u:3,v:4,w:5,x:6,y:7,z:8};
+  const clean = prenom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '');
+  let sum = 0;
+  for (const c of clean) sum += table[c] || 0;
+  return reduceToSingle(sum);
+}
+
+function getSoulUrge(prenom: string): number {
+  const table: Record<string, number> = {a:1,e:5,i:9,o:6,u:3,y:7};
+  const clean = prenom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z]/g, '');
+  let sum = 0;
+  for (const c of clean) { if (table[c]) sum += table[c]; }
+  return reduceToSingle(sum);
+}
+
+function getPersonalYear(day: number, month: number): number {
+  const currentYear = new Date().getFullYear();
+  return reduceToSingle(day + month + reduceToSingle(Array.from(String(currentYear)).reduce((s, c) => s + parseInt(c), 0)));
+}
+
+function getPersonalMonth(day: number, month: number): number {
+  const currentMonth = new Date().getMonth() + 1;
+  return reduceToSingle(getPersonalYear(day, month) + currentMonth);
+}
+
+const LIFE_PATH_KEYWORDS: Record<number, string> = {
+  1: 'leader né, indépendant, pionnier',
+  2: 'diplomate, sensible, médiateur',
+  3: 'créatif, expressif, communicant',
+  4: 'bâtisseur, stable, méthodique',
+  5: 'aventurier, libre, adaptable',
+  6: 'protecteur, responsable, harmonieux',
+  7: 'chercheur, spirituel, analytique',
+  8: 'ambitieux, puissant, matérialiste',
+  9: 'humaniste, généreux, visionnaire',
+  11: 'intuitif, inspirant, maître spirituel',
+  22: 'maître bâtisseur, visionnaire, accomplisseur',
+  33: 'maître enseignant, guérisseur, altruiste',
+};
+
+// ============ API ROUTE ============
+
 export async function POST(request: NextRequest) {
   const { prenom, dateNaissance, question } = await request.json();
+  
+  // Parse date (format YYYY-MM-DD)
+  const parts = dateNaissance.split('-');
+  const year = parseInt(parts[0]);
+  const month = parseInt(parts[1]);
+  const day = parseInt(parts[2]);
+
+  // Vrais calculs
+  const zodiac = getZodiac(day, month);
+  const decan = getDecan(day, month);
+  const lifePath = getLifePath(day, month, year);
+  const expression = getExpressionNumber(prenom);
+  const soulUrge = getSoulUrge(prenom);
+  const personalYear = getPersonalYear(day, month);
+  const personalMonth = getPersonalMonth(day, month);
+
+  const astroData = `DONNÉES ASTRO-NUMÉROLOGIQUES RÉELLES DE ${prenom} :
+- Signe solaire : ${zodiac.name} (${zodiac.element}, ${zodiac.modalite})
+- Planète dominante : ${zodiac.planete}
+- Décan : ${decan.num}e décan, influence ${decan.influence}
+- Chemin de vie : ${lifePath} (${LIFE_PATH_KEYWORDS[lifePath] || 'unique'})
+- Nombre d'expression (prénom) : ${expression}
+- Nombre intime (voyelles) : ${soulUrge}
+- Année personnelle 2026 : ${personalYear}
+- Mois personnel actuel : ${personalMonth}`;
 
   const sujet = question ? `\nSa question : ${question}` : '';
 
   const message = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 120,
-    system: `Tu es un astrologue expert pour Mystora. Tu génères un teaser astrologique ultra-court à titre de divertissement.
+    max_tokens: 150,
+    system: `Tu es un astrologue et numérologue expert pour Mystora. Tu utilises les VRAIES données astro-numérologiques calculées pour générer un teaser personnalisé.
 
 RÈGLES ABSOLUES :
 - EXACTEMENT 2 phrases. Pas 3, pas 1. Deux.
-- La 1ère phrase : une révélation personnalisée bluffante liée à sa question ou son signe
-- La 2ème phrase : un cliffhanger frustrant qui coupe net ("Mais ce que ton thème révèle sur les semaines à venir...")
-- Si une question est posée, contextualise ta réponse à cette question
+- Utilise les VRAIS chiffres et données fournis (signe, chemin de vie, décan, année personnelle)
+- La 1ère phrase : une révélation basée sur les données réelles (cite le chemin de vie, le signe, le décan ou l'année personnelle)
+- La 2ème phrase : un cliffhanger frustrant qui coupe net
+- Si une question est posée, contextualise avec les données réelles
 - Tutoie, utilise le prénom
-- Sois précis et percutant — chaque mot doit compter
-- Ne satisfais RIEN. Le lecteur doit ABSOLUMENT vouloir lire la suite.
-- Ton : mystérieux, affirmatif, intrigant
+- Ne satisfais RIEN — le lecteur doit vouloir la suite
 - Texte brut uniquement, pas de markdown
-- Ne mentionne jamais l'IA
-- Reste positif et bienveillant`,
+- Ne mentionne jamais l'IA`,
     messages: [
       {
         role: 'user',
-        content: `Génère un teaser astrologique de EXACTEMENT 2 phrases pour ${prenom}, né(e) le ${dateNaissance}.${sujet}\nLa 1ère phrase doit bluffer. La 2ème doit frustrer et donner envie de payer pour la suite.`
+        content: `${astroData}${sujet}\n\nGénère un teaser de EXACTEMENT 2 phrases pour ${prenom}. Utilise les vraies données ci-dessus. La 1ère phrase doit bluffer avec des données réelles. La 2ème doit frustrer.`
       }
     ]
   });
