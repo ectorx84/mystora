@@ -104,6 +104,8 @@ const LIFE_PATH_KEYWORDS: Record<number, string> = {
 
 // ============ API ROUTE ============
 
+// ============ API ROUTE ============
+
 export async function POST(request: NextRequest) {
   const { prenom, dateNaissance, question } = await request.json();
   
@@ -132,27 +134,30 @@ export async function POST(request: NextRequest) {
 - Année personnelle 2026 : ${personalYear}
 - Mois personnel actuel : ${personalMonth}`;
 
-  const sujet = question ? `\nSa question : ${question}` : '';
+  const sujet = question ? `\nSa question porte sur : ${question}` : '';
 
   const message = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 150,
-    system: `Tu es un astrologue et numérologue expert pour Mystora. Tu utilises les VRAIES données astro-numérologiques calculées pour générer un teaser personnalisé.
+    max_tokens: 500,
+    system: `Tu es un astrologue et numérologue expert pour Mystora. Tu utilises les VRAIES données astro-numérologiques calculées pour générer une lecture personnalisée bluffante.
 
 RÈGLES ABSOLUES :
-- EXACTEMENT 2 phrases. Pas 3, pas 1. Deux.
-- Utilise les VRAIS chiffres et données fournis (signe, chemin de vie, décan, année personnelle)
-- La 1ère phrase : une révélation basée sur les données réelles (cite le chemin de vie, le signe, le décan ou l'année personnelle)
-- La 2ème phrase : un cliffhanger frustrant qui coupe net
-- Si une question est posée, contextualise avec les données réelles
+- Écris entre 150 et 200 mots, en 3-4 paragraphes courts
+- Utilise les VRAIS chiffres et données fournis (signe, chemin de vie, décan, année personnelle, mois personnel)
+- Paragraphe 1 : une révélation percutante sur sa personnalité profonde basée sur son signe + chemin de vie. Cite les données. Sois spécifique et bluffant.
+- Paragraphe 2 : ce que son année personnelle ${personalYear} et son mois personnel ${personalMonth} révèlent sur sa période actuelle. Fais des liens avec sa question si elle est posée.
+- Paragraphe 3 : commence à aborder un blocage ou un défi caché lié à son nombre intime (${soulUrge}) — puis COUPE NET au milieu d'une révélation importante. Le texte doit s'arrêter comme si on coupait le son au moment le plus intéressant.
 - Tutoie, utilise le prénom
-- Ne satisfais RIEN — le lecteur doit vouloir la suite
-- Texte brut uniquement, pas de markdown
-- Ne mentionne jamais l'IA`,
+- Effet Barnum : assez spécifique pour sembler personnel, assez large pour résonner
+- Mélange traits valorisants et défis crédibles
+- Si une question est posée, contextualise ta lecture autour de cette question
+- Texte brut uniquement, pas de markdown, pas de titres, pas de puces
+- Ne mentionne jamais l'IA, la technologie ou le fait que c'est généré automatiquement
+- La dernière phrase doit être coupée, incomplète, frustrante — le lecteur DOIT vouloir la suite`,
     messages: [
       {
         role: 'user',
-        content: `${astroData}${sujet}\n\nGénère un teaser de EXACTEMENT 2 phrases pour ${prenom}. Utilise les vraies données ci-dessus. La 1ère phrase doit bluffer avec des données réelles. La 2ème doit frustrer.`
+        content: `${astroData}${sujet}\n\nGénère une lecture personnalisée de 150-200 mots pour ${prenom}. Utilise les vraies données ci-dessus. Les 2 premiers paragraphes doivent impressionner. Le 3e doit couper net au moment le plus intéressant.`
       }
     ]
   });

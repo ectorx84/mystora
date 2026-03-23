@@ -11,6 +11,7 @@ const LOADING_MESSAGES = [
 
 export default function Home() {
   const [prenom, setPrenom] = useState('');
+  const [email, setEmail] = useState('');
   const [jour, setJour] = useState('');
   const [mois, setMois] = useState('');
   const [annee, setAnnee] = useState('');
@@ -80,6 +81,15 @@ export default function Home() {
     setLoadingIdx(0);
     setResultat('');
     try {
+      // Subscribe email if provided (fire and forget)
+      if (email.trim()) {
+        fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim(), prenom }),
+        }).catch(() => {});
+      }
+
       const sujet = question.trim() || quickTopic || '';
       const res = await fetch('/api/astro', {
         method: 'POST',
@@ -103,7 +113,7 @@ export default function Home() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, dateNaissance, email: '', question: question.trim() || quickTopic || '' }),
+        body: JSON.stringify({ prenom, dateNaissance, email: email.trim(), question: question.trim() || quickTopic || '' }),
       });
       const data = await res.json();
       window.location.href = data.url;
@@ -156,6 +166,18 @@ export default function Home() {
                       onChange={(e) => handleAnnee(e.target.value)}
                       className="bg-[#0F0D2E] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-2/4 text-center text-lg font-semibold transition-colors" />
                   </div>
+                </div>
+                {/* Email */}
+                <div className="flex flex-col gap-1">
+                  <input
+                    type="email"
+                    placeholder="Ton email (pour recevoir ta lecture)"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="bg-[#0F0D2E] text-white placeholder-gray-500 rounded-xl px-4 py-3 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-sm"
+                    autoComplete="email"
+                  />
+                  <p className="text-gray-600 text-xs px-1">Optionnel — reçois aussi ton horoscope personnalisé chaque semaine</p>
                 </div>
                 {/* Quick Topics */}
                 <div>
@@ -234,7 +256,7 @@ export default function Home() {
                 <span className="text-xl">✨</span>
                 <h2 className="text-white text-lg font-semibold">{prenom}, voici ce que les astres révèlent</h2>
               </div>
-              <p className="text-gray-200 text-[15px] leading-relaxed">{resultat}</p>
+              <div className="text-gray-200 text-[15px] leading-relaxed whitespace-pre-line">{resultat}</div>
 
               {/* Blurred content - paywall */}
               <div className="relative mt-4">
@@ -255,6 +277,17 @@ export default function Home() {
               <p className="text-gray-300 text-sm text-center mb-4">
                 Profil astral détaillé • Amour • Carrière • Blocages • Chemin de vie • Prévisions du mois
               </p>
+              {/* Email capture on result page if not already provided */}
+              {!email.trim() && (
+                <input
+                  type="email"
+                  placeholder="Ton email (pour recevoir le rapport)"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-[#0F0D2E] text-white placeholder-gray-500 rounded-xl px-4 py-3 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-sm mb-3"
+                  autoComplete="email"
+                />
+              )}
               <button onClick={handlePaiement} disabled={payLoading}
                 className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
                 {payLoading ? '⏳ Redirection...' : 'Débloquer mon rapport — 4,90€'}
