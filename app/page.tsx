@@ -163,7 +163,7 @@ export default function Home() {
                 </div>
                 <button onClick={handleSubmit}
                   disabled={!prenom || !dateNaissance || blocked}
-                  className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-600 text-white font-bold py-4 rounded-xl transition-all duration-300 mt-1 disabled:opacity-50 text-lg shadow-lg shadow-purple-900/30">
+                  className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 text-white font-bold py-4 rounded-xl transition-all duration-300 mt-1 disabled:opacity-60 text-lg shadow-lg shadow-purple-900/30">
                   {blocked ? '🔒 Test gratuit utilisé' : '✨ Recevoir mon message'}
                 </button>
                 {blocked ? (
