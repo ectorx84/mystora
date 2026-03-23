@@ -107,15 +107,13 @@ const LIFE_PATH_KEYWORDS: Record<number, string> = {
 // ============ API ROUTE ============
 
 export async function POST(request: NextRequest) {
-  const { prenom, dateNaissance, question } = await request.json();
+  const { prenom, dateNaissance } = await request.json();
   
-  // Parse date (format YYYY-MM-DD)
   const parts = dateNaissance.split('-');
   const year = parseInt(parts[0]);
   const month = parseInt(parts[1]);
   const day = parseInt(parts[2]);
 
-  // Vrais calculs
   const zodiac = getZodiac(day, month);
   const decan = getDecan(day, month);
   const lifePath = getLifePath(day, month, year);
@@ -134,30 +132,27 @@ export async function POST(request: NextRequest) {
 - Année personnelle 2026 : ${personalYear}
 - Mois personnel actuel : ${personalMonth}`;
 
-  const sujet = question ? `\nSa question porte sur : ${question}` : '';
-
   const message = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 500,
     system: `Tu es un astrologue et numérologue expert pour Mystora. Tu utilises les VRAIES données astro-numérologiques calculées pour générer une lecture personnalisée bluffante.
 
 RÈGLES ABSOLUES :
-- Écris entre 150 et 200 mots, en 3-4 paragraphes courts
+- Écris entre 150 et 200 mots, en 3 paragraphes courts
 - Utilise les VRAIS chiffres et données fournis (signe, chemin de vie, décan, année personnelle, mois personnel)
-- Paragraphe 1 : une révélation percutante sur sa personnalité profonde basée sur son signe + chemin de vie. Cite les données. Sois spécifique et bluffant.
-- Paragraphe 2 : ce que son année personnelle ${personalYear} et son mois personnel ${personalMonth} révèlent sur sa période actuelle. Fais des liens avec sa question si elle est posée.
-- Paragraphe 3 : commence à aborder un blocage ou un défi caché lié à son nombre intime (${soulUrge}) — puis COUPE NET au milieu d'une révélation importante. Le texte doit s'arrêter comme si on coupait le son au moment le plus intéressant.
-- Tutoie, utilise le prénom
+- Paragraphe 1 : une révélation percutante sur la personnalité profonde de ${prenom} basée sur son signe ${zodiac.name}, son chemin de vie ${lifePath} et son décan. Cite les données. Sois spécifique et bluffant. Le lecteur doit penser "comment il sait ça ?".
+- Paragraphe 2 : ce que son année personnelle ${personalYear} et son mois personnel ${personalMonth} révèlent sur la période actuelle. Parle d'amour, de carrière ou de décisions — sois concret, pas vague.
+- Paragraphe 3 : commence à révéler un blocage caché ou un schéma répétitif lié à son nombre intime (${soulUrge}) — puis COUPE NET au milieu de la phrase la plus importante. Le texte doit s'arrêter brutalement comme si on coupait le son au moment le plus intéressant.
+- Tutoie, utilise le prénom dès la première phrase
 - Effet Barnum : assez spécifique pour sembler personnel, assez large pour résonner
-- Mélange traits valorisants et défis crédibles
-- Si une question est posée, contextualise ta lecture autour de cette question
-- Texte brut uniquement, pas de markdown, pas de titres, pas de puces
-- Ne mentionne jamais l'IA, la technologie ou le fait que c'est généré automatiquement
-- La dernière phrase doit être coupée, incomplète, frustrante — le lecteur DOIT vouloir la suite`,
+- Mélange traits valorisants et défis crédibles — pas que du positif
+- Texte brut uniquement, pas de markdown, pas de titres, pas de puces, pas de gras
+- Ne mentionne jamais l'IA, la technologie ou le fait que c'est généré
+- La dernière phrase DOIT être coupée, incomplète, frustrante`,
     messages: [
       {
         role: 'user',
-        content: `${astroData}${sujet}\n\nGénère une lecture personnalisée de 150-200 mots pour ${prenom}. Utilise les vraies données ci-dessus. Les 2 premiers paragraphes doivent impressionner. Le 3e doit couper net au moment le plus intéressant.`
+        content: `${astroData}\n\nGénère une lecture personnalisée de 150-200 mots pour ${prenom}. Utilise les vraies données ci-dessus. Les 2 premiers paragraphes doivent impressionner. Le 3e doit couper net au milieu d'une révélation importante.`
       }
     ]
   });

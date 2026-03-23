@@ -16,15 +16,13 @@ export default function Home() {
   const [mois, setMois] = useState('');
   const [annee, setAnnee] = useState('');
   const [resultat, setResultat] = useState('');
-  const [question, setQuestion] = useState('');
-  const [quickTopic, setQuickTopic] = useState('');
   const [step, setStep] = useState<'form' | 'loading' | 'result'>('form');
   const [loadingIdx, setLoadingIdx] = useState(0);
   const [payLoading, setPayLoading] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [timeLeft, setTimeLeft] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
 
-  // Check 24h limit on mount
   useEffect(() => {
     const lastTest = localStorage.getItem('mystora_last_test');
     if (lastTest) {
@@ -61,14 +59,12 @@ export default function Home() {
     setAnnee(val.replace(/\D/g, '').slice(0, 4));
   };
 
-  // Loading animation
   useEffect(() => {
     if (step !== 'loading') return;
     const iv = setInterval(() => setLoadingIdx(i => (i + 1) % LOADING_MESSAGES.length), 1800);
     return () => clearInterval(iv);
   }, [step]);
 
-  // Scroll to result
   useEffect(() => {
     if (step === 'result' && resultRef.current) {
       resultRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -81,30 +77,31 @@ export default function Home() {
     setLoadingIdx(0);
     setResultat('');
     try {
-      // Subscribe email if provided (fire and forget)
-      if (email.trim()) {
-        fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email.trim(), prenom }),
-        }).catch(() => {});
-      }
-
-      const sujet = question.trim() || quickTopic || '';
       const res = await fetch('/api/astro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, dateNaissance, question: sujet }),
+        body: JSON.stringify({ prenom, dateNaissance }),
       });
       const data = await res.json();
       setResultat(data.resultat);
       setStep('result');
-      // Save timestamp for 24h limit
       localStorage.setItem('mystora_last_test', Date.now().toString());
       setBlocked(true);
     } catch {
       setStep('form');
     }
+  };
+
+  const handleEmailSubmit = async () => {
+    if (!email.trim()) return;
+    setEmailSent(true);
+    try {
+      await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), prenom }),
+      });
+    } catch {}
   };
 
   const handlePaiement = async () => {
@@ -113,7 +110,7 @@ export default function Home() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, dateNaissance, email: email.trim(), question: question.trim() || quickTopic || '' }),
+        body: JSON.stringify({ prenom, dateNaissance, email: email.trim(), question: '' }),
       });
       const data = await res.json();
       window.location.href = data.url;
@@ -124,7 +121,6 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-[#0F0D2E] relative overflow-hidden">
-      {/* Background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-900/20 rounded-full blur-3xl" />
         <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-amber-900/10 rounded-full blur-3xl" />
@@ -138,12 +134,10 @@ export default function Home() {
             <div className="text-center mb-6">
               <h1 className="text-4xl font-bold text-white tracking-tight">🔮 Mystora</h1>
               <p className="text-[#D4A574] text-base mt-2 font-medium">Voyance mystique personnalisée</p>
-              <p className="text-gray-400 text-sm mt-1 max-w-xs mx-auto">Une lecture personnalisée d&apos;une précision jamais vue. Entre ton prénom et laisse les astres parler.</p>
-              <p className="text-gray-500 text-xs mt-1">✨ Gratuit et immédiat</p>
+              <p className="text-gray-400 text-sm mt-2 max-w-xs mx-auto">Entre ton prénom et ta date de naissance. Les astres feront le reste.</p>
             </div>
 
-            <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-7 w-full max-w-md shadow-2xl border border-purple-500/10">
-              <h2 className="text-white text-xl font-semibold text-center mb-6">Pose ta question aux astres</h2>
+            <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-7 w-full max-w-sm shadow-2xl border border-purple-500/10">
               <div className="flex flex-col gap-4">
                 <input
                   type="text"
@@ -167,57 +161,15 @@ export default function Home() {
                       className="bg-[#0F0D2E] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-2/4 text-center text-lg font-semibold transition-colors" />
                   </div>
                 </div>
-                {/* Email */}
-                <div className="flex flex-col gap-1">
-                  <input
-                    type="email"
-                    placeholder="Ton email (pour recevoir ta lecture)"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="bg-[#0F0D2E] text-white placeholder-gray-500 rounded-xl px-4 py-3 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-sm"
-                    autoComplete="email"
-                  />
-                  <p className="text-gray-600 text-xs px-1">Optionnel — reçois aussi ton horoscope personnalisé chaque semaine</p>
-                </div>
-                {/* Quick Topics */}
-                <div>
-                  <label className="text-gray-400 text-xs px-1 mb-1.5 block">Ta question concerne...</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { emoji: '❤️', label: 'Amour', value: 'amour et relations' },
-                      { emoji: '💼', label: 'Travail', value: 'carrière et travail' },
-                      { emoji: '🔓', label: 'Blocages', value: 'blocages et obstacles' },
-                      { emoji: '✨', label: 'Avenir', value: 'ce qui m\'attend' },
-                    ].map(t => (
-                      <button key={t.value} type="button"
-                        onClick={() => { setQuickTopic(t.value); setQuestion(''); }}
-                        className={`py-2.5 px-3 rounded-xl text-sm font-medium transition-all duration-200 border ${
-                          quickTopic === t.value
-                            ? 'bg-purple-700/50 border-amber-400/50 text-amber-200'
-                            : 'bg-[#0F0D2E] border-purple-700/30 text-gray-300 hover:border-purple-500/50'
-                        }`}>
-                        {t.emoji} {t.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                {/* Question libre */}
-                <textarea
-                  placeholder="Ou écris ta question ici... (optionnel)"
-                  value={question}
-                  onChange={e => { setQuestion(e.target.value); if (e.target.value.trim()) setQuickTopic(''); }}
-                  rows={2}
-                  className="w-full bg-[#0F0D2E] text-white placeholder-gray-500 rounded-xl px-4 py-3 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-sm resize-none"
-                />
                 <button onClick={handleSubmit}
                   disabled={!prenom || !dateNaissance || blocked}
-                  className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-600 text-white font-bold py-3.5 rounded-xl transition-all duration-300 mt-2 disabled:opacity-50 text-lg shadow-lg shadow-purple-900/30">
+                  className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 disabled:from-gray-700 disabled:to-gray-600 text-white font-bold py-4 rounded-xl transition-all duration-300 mt-1 disabled:opacity-50 text-lg shadow-lg shadow-purple-900/30">
                   {blocked ? '🔒 Test gratuit utilisé' : '✨ Recevoir mon message'}
                 </button>
                 {blocked ? (
-                  <p className="text-amber-200/70 text-xs text-center">Tu as déjà utilisé ton test gratuit. Débloque ton rapport complet maintenant.</p>
+                  <p className="text-amber-200/70 text-xs text-center">Tu as déjà reçu ta lecture. Découvre ton rapport complet ci-dessous.</p>
                 ) : (
-                  <p className="text-gray-500 text-xs text-center">Sans carte bancaire • Résultat immédiat</p>
+                  <p className="text-gray-500 text-xs text-center">Gratuit • Sans carte bancaire • 30 secondes</p>
                 )}
               </div>
             </div>
@@ -250,7 +202,7 @@ export default function Home() {
               <h1 className="text-3xl font-bold text-white">🔮 Mystora</h1>
             </div>
 
-            {/* Teaser visible */}
+            {/* Résultat gratuit */}
             <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border border-purple-500/10 mb-4">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xl">✨</span>
@@ -258,12 +210,12 @@ export default function Home() {
               </div>
               <div className="text-gray-200 text-[15px] leading-relaxed whitespace-pre-line">{resultat}</div>
 
-              {/* Blurred content - paywall */}
+              {/* Blurred content */}
               <div className="relative mt-4">
                 <div className="text-gray-300 text-[15px] leading-relaxed blur-[6px] select-none pointer-events-none" aria-hidden="true">
-                  <p className="mb-2">Ton thème astral révèle une période de transformation profonde qui va impacter tes relations et ta carrière de manière inattendue. Les alignements planétaires de ce mois indiquent un tournant majeur dans ton chemin de vie.</p>
-                  <p className="mb-2">Côté amour, une rencontre ou une prise de conscience va bouleverser ta vision des choses. Côté carrière, une opportunité cachée se prépare mais tu dois savoir exactement quand agir.</p>
-                  <p>Ta numérologie personnelle confirme ce cycle de renouveau et révèle les dates clés de ton mois à venir...</p>
+                  <p className="mb-2">Ton thème astral révèle une période de transformation profonde qui va impacter tes relations et ta carrière de manière inattendue. Les alignements planétaires indiquent un tournant majeur.</p>
+                  <p className="mb-2">Côté amour, une rencontre ou une prise de conscience va bouleverser ta vision des choses. Côté carrière, une opportunité cachée se prépare.</p>
+                  <p>Ta numérologie personnelle confirme ce cycle de renouveau et révèle les dates clés à venir...</p>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#1A1747]/50 to-[#1A1747] flex items-end justify-center pb-2">
                   <p className="text-amber-200/80 text-sm">La suite de ton profil est prête...</p>
@@ -271,23 +223,38 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Email capture */}
+            {!emailSent ? (
+              <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10 mb-4">
+                <p className="text-gray-300 text-sm text-center mb-3">📧 Reçois ta lecture par email + ton horoscope chaque semaine</p>
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    placeholder="Ton email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="flex-1 bg-[#0F0D2E] text-white placeholder-gray-500 rounded-xl px-4 py-3 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-sm"
+                    autoComplete="email"
+                  />
+                  <button onClick={handleEmailSubmit}
+                    disabled={!email.trim()}
+                    className="bg-purple-700 hover:bg-purple-600 disabled:bg-gray-700 text-white font-semibold px-4 py-3 rounded-xl transition-colors text-sm disabled:opacity-50">
+                    OK
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-[#1A1747]/60 rounded-2xl p-3 border border-purple-500/10 mb-4 text-center">
+                <p className="text-[#D4A574] text-sm">✅ C&apos;est noté ! Tu recevras ta lecture à {email}</p>
+              </div>
+            )}
+
             {/* CTA Card */}
             <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20">
               <h3 className="text-white text-center font-semibold text-lg mb-1">🔮 Ton rapport complet est prêt</h3>
               <p className="text-gray-300 text-sm text-center mb-4">
                 Profil astral détaillé • Amour • Carrière • Blocages • Chemin de vie • Prévisions du mois
               </p>
-              {/* Email capture on result page if not already provided */}
-              {!email.trim() && (
-                <input
-                  type="email"
-                  placeholder="Ton email (pour recevoir le rapport)"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#0F0D2E] text-white placeholder-gray-500 rounded-xl px-4 py-3 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-sm mb-3"
-                  autoComplete="email"
-                />
-              )}
               <button onClick={handlePaiement} disabled={payLoading}
                 className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
                 {payLoading ? '⏳ Redirection...' : 'Débloquer mon rapport — 4,90€'}
