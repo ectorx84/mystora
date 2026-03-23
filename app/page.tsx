@@ -223,10 +223,26 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Email capture */}
+            {/* CTA Card — priorité #1 */}
+            <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20 mb-4">
+              <h3 className="text-white text-center font-semibold text-lg mb-1">🔮 Ton rapport complet est prêt</h3>
+              <p className="text-gray-300 text-sm text-center mb-4">
+                Profil astral détaillé • Amour • Carrière • Blocages • Chemin de vie • Prévisions du mois
+              </p>
+              <button onClick={handlePaiement} disabled={payLoading}
+                className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
+                {payLoading ? '⏳ Redirection...' : 'Débloquer mon rapport — 4,90€'}
+              </button>
+              <div className="flex items-center justify-center gap-4 mt-3 text-gray-400 text-xs">
+                <span>🔒 Paiement sécurisé</span>
+                <span>⚡ Résultat instantané</span>
+              </div>
+            </div>
+
+            {/* Email capture — filet de rattrapage */}
             {!emailSent ? (
-              <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10 mb-4">
-                <p className="text-gray-300 text-sm text-center mb-3">📧 Reçois ta lecture par email + ton horoscope chaque semaine</p>
+              <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
+                <p className="text-gray-400 text-sm text-center mb-3">Pas encore prêt(e) ? Reçois ta lecture par email</p>
                 <div className="flex gap-2">
                   <input
                     type="email"
@@ -244,26 +260,10 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              <div className="bg-[#1A1747]/60 rounded-2xl p-3 border border-purple-500/10 mb-4 text-center">
+              <div className="bg-[#1A1747]/60 rounded-2xl p-3 border border-purple-500/10 text-center">
                 <p className="text-[#D4A574] text-sm">✅ C&apos;est noté ! Tu recevras ta lecture à {email}</p>
               </div>
             )}
-
-            {/* CTA Card */}
-            <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20">
-              <h3 className="text-white text-center font-semibold text-lg mb-1">🔮 Ton rapport complet est prêt</h3>
-              <p className="text-gray-300 text-sm text-center mb-4">
-                Profil astral détaillé • Amour • Carrière • Blocages • Chemin de vie • Prévisions du mois
-              </p>
-              <button onClick={handlePaiement} disabled={payLoading}
-                className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
-                {payLoading ? '⏳ Redirection...' : 'Débloquer mon rapport — 4,90€'}
-              </button>
-              <div className="flex items-center justify-center gap-4 mt-3 text-gray-400 text-xs">
-                <span>🔒 Paiement sécurisé</span>
-                <span>⚡ Résultat instantané</span>
-              </div>
-            </div>
 
             {/* Avis clients */}
             <div className="mt-4 flex flex-col gap-3">
