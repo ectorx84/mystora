@@ -167,13 +167,32 @@ export default function Home() {
                   className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 text-white font-bold py-4 rounded-xl transition-all duration-300 mt-1 disabled:opacity-60 text-lg shadow-lg shadow-purple-900/30">
                   {blocked ? '🔒 Test gratuit utilisé' : '✨ Découvrir mon message'}
                 </button>
-                {blocked ? (
-                  <p className="text-amber-200/70 text-xs text-center">Tu as déjà reçu ta lecture. Découvre ton rapport complet ci-dessous.</p>
-                ) : (
+                {!blocked && (
                   <p className="text-gray-500 text-xs text-center">Gratuit • Sans carte bancaire • Résultat immédiat</p>
                 )}
               </div>
             </div>
+
+            {/* CTA payant quand test déjà utilisé */}
+            {blocked && (
+              <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20 mt-4 w-full max-w-sm">
+                <h3 className="text-white text-center font-semibold text-lg mb-1">✨ Ton rapport complet est prêt</h3>
+                <p className="text-gray-300 text-sm text-center mb-4">
+                  Profil astral détaillé • Amour • Carrière • Blocages • Chemin de vie • Prévisions
+                </p>
+                <button onClick={handlePaiement} disabled={payLoading || !prenom || !dateNaissance}
+                  className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
+                  {payLoading ? '⏳ Redirection...' : 'Débloquer mon rapport complet — 4,90€'}
+                </button>
+                {(!prenom || !dateNaissance) && (
+                  <p className="text-gray-400 text-xs text-center mt-2">Entre ton prénom et ta date ci-dessus</p>
+                )}
+                <div className="flex items-center justify-center gap-4 mt-3 text-gray-400 text-xs">
+                  <span>🔒 Paiement sécurisé</span>
+                  <span>⚡ Résultat instantané</span>
+                </div>
+              </div>
+            )}
           </>
         )}
 
