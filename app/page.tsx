@@ -16,12 +16,13 @@ export default function Home() {
   const [mois, setMois] = useState('');
   const [annee, setAnnee] = useState('');
   const [resultat, setResultat] = useState('');
-  const [step, setStep] = useState<'form' | 'loading' | 'result'>('form');
+  const [step, setStep] = useState<'welcome' | 'form' | 'loading' | 'result'>('welcome');
   const [loadingIdx, setLoadingIdx] = useState(0);
   const [payLoading, setPayLoading] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [timeLeft, setTimeLeft] = useState('');
   const [emailSent, setEmailSent] = useState(false);
+  const welcomeAudioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const lastTest = localStorage.getItem('mystora_last_test');
@@ -44,6 +45,13 @@ export default function Home() {
 
   const dateNaissance = annee.length === 4 && mois.length === 2 && jour.length === 2
     ? `${annee}-${mois}-${jour}` : '';
+
+  const startExperience = () => {
+    const audio = new Audio('/welcome.mp3');
+    welcomeAudioRef.current = audio;
+    audio.play().catch(() => {});
+    setStep('form');
+  };
 
   const handleJour = (val: string) => {
     const clean = val.replace(/\D/g, '').slice(0, 2);
@@ -73,6 +81,10 @@ export default function Home() {
 
   const handleSubmit = async () => {
     if (!prenom || !dateNaissance || blocked) return;
+    if (welcomeAudioRef.current) {
+      welcomeAudioRef.current.pause();
+      welcomeAudioRef.current = null;
+    }
     setStep('loading');
     setLoadingIdx(0);
     setResultat('');
@@ -128,13 +140,32 @@ export default function Home() {
 
       <div className="relative z-10 flex flex-col items-center px-4 py-8 min-h-screen justify-center">
 
+        {/* ===== WELCOME ===== */}
+        {step === 'welcome' && (
+          <div className="flex flex-col items-center justify-center text-center px-4">
+            <div className="text-6xl mb-6 animate-pulse">🔮</div>
+            <h1 className="text-4xl font-bold text-white tracking-tight mb-3">Mystora</h1>
+            <p className="text-gray-300 text-lg max-w-xs mx-auto leading-relaxed mb-2">
+              Je vais te faire une lecture personnalisée, en voix et en texte.
+            </p>
+            <p className="text-gray-500 text-sm max-w-xs mx-auto mb-8">
+              Une guidance unique, rien que pour toi.
+            </p>
+            <button onClick={startExperience}
+              className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 text-white font-bold py-4 px-10 rounded-xl transition-all duration-300 text-lg shadow-lg shadow-purple-900/30 animate-bounce">
+              Commencer ma lecture
+            </button>
+            <p className="text-gray-600 text-xs mt-4">Gratuit • 30 secondes • En voix et en texte</p>
+          </div>
+        )}
+
         {/* ===== FORM ===== */}
         {step === 'form' && (
           <>
             <div className="text-center mb-6">
               <h1 className="text-4xl font-bold text-white tracking-tight">🔮 Mystora</h1>
-              <p className="text-[#D4A574] text-base mt-2 font-medium">Voyance mystique personnalisée</p>
-              <p className="text-gray-400 text-sm mt-2 max-w-xs mx-auto">Entre ton prénom et ta date de naissance. Les astres feront le reste.</p>
+              <p className="text-[#D4A574] text-base mt-2 font-medium">Lecture personnalisée</p>
+              <p className="text-gray-400 text-sm mt-2 max-w-xs mx-auto">Entre ton prénom et ta date de naissance pour recevoir ta lecture.</p>
             </div>
 
             <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-7 w-full max-w-sm shadow-2xl border border-purple-500/10">
@@ -146,6 +177,7 @@ export default function Home() {
                   onChange={(e) => setPrenom(e.target.value)}
                   className="bg-[#0F0D2E] text-white placeholder-gray-400 rounded-xl px-4 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-lg"
                   autoComplete="given-name"
+                  autoFocus
                 />
                 <div className="flex flex-col gap-1">
                   <label className="text-gray-400 text-sm px-1">Date de naissance</label>
@@ -164,12 +196,12 @@ export default function Home() {
                 <button onClick={handleSubmit}
                   disabled={!prenom || !dateNaissance || blocked}
                   className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 text-white font-bold py-4 rounded-xl transition-all duration-300 mt-1 disabled:opacity-60 text-lg shadow-lg shadow-purple-900/30">
-                  {blocked ? '🔒 Test gratuit utilisé' : '✨ Recevoir mon message'}
+                  {blocked ? '🔒 Test gratuit utilisé' : '🎙️ Lancer ma lecture'}
                 </button>
                 {blocked ? (
                   <p className="text-amber-200/70 text-xs text-center">Tu as déjà reçu ta lecture. Découvre ton rapport complet ci-dessous.</p>
                 ) : (
-                  <p className="text-gray-500 text-xs text-center">Gratuit • Sans carte bancaire • 30 secondes</p>
+                  <p className="text-gray-500 text-xs text-center">Ta lecture sera révélée en voix et en texte</p>
                 )}
               </div>
             </div>
@@ -225,13 +257,13 @@ export default function Home() {
 
             {/* CTA Card — priorité #1 */}
             <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20 mb-4">
-              <h3 className="text-white text-center font-semibold text-lg mb-1">🔮 Ton rapport complet est prêt</h3>
+              <h3 className="text-white text-center font-semibold text-lg mb-1">🎙️ Ta lecture complète est prête</h3>
               <p className="text-gray-300 text-sm text-center mb-4">
-                Profil astral détaillé • Amour • Carrière • Blocages • Chemin de vie • Prévisions du mois
+                Lecture audio complète • Profil astral détaillé • Amour • Carrière • Blocages • Chemin de vie
               </p>
               <button onClick={handlePaiement} disabled={payLoading}
                 className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
-                {payLoading ? '⏳ Redirection...' : 'Débloquer mon rapport — 4,90€'}
+                {payLoading ? '⏳ Redirection...' : '🎙️ Débloquer ma lecture complète — 4,90€'}
               </button>
               <div className="flex items-center justify-center gap-4 mt-3 text-gray-400 text-xs">
                 <span>🔒 Paiement sécurisé</span>
@@ -291,7 +323,7 @@ export default function Home() {
               </div>
             </div>
 
-            <button onClick={() => { setStep('form'); setResultat(''); }}
+            <button onClick={() => { setStep('welcome'); setResultat(''); }}
               className="w-full text-gray-500 text-sm mt-4 py-2 hover:text-gray-300 transition-colors text-center">
               ← Nouvelle consultation
             </button>
