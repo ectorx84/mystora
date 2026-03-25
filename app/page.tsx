@@ -34,6 +34,28 @@ export default function Home() {
         const h = Math.floor(remaining / 3600000);
         const m = Math.floor((remaining % 3600000) / 60000);
         setTimeLeft(`${h}h${m.toString().padStart(2, '0')}`);
+        // Restore previous result
+        const savedResult = localStorage.getItem('mystora_last_result');
+        const savedPrenom = localStorage.getItem('mystora_last_prenom');
+        const savedDate = localStorage.getItem('mystora_last_date');
+        if (savedResult && savedPrenom) {
+          setResultat(savedResult);
+          setPrenom(savedPrenom);
+          if (savedDate) {
+            const parts = savedDate.split('-');
+            if (parts.length === 3) {
+              setAnnee(parts[0]);
+              setMois(parts[1]);
+              setJour(parts[2]);
+            }
+          }
+          setStep('result');
+        }
+      } else {
+        // 24h passed, clean up
+        localStorage.removeItem('mystora_last_result');
+        localStorage.removeItem('mystora_last_prenom');
+        localStorage.removeItem('mystora_last_date');
       }
     }
   }, []);
@@ -86,6 +108,9 @@ export default function Home() {
       setResultat(data.resultat);
       setStep('result');
       localStorage.setItem('mystora_last_test', Date.now().toString());
+      localStorage.setItem('mystora_last_result', data.resultat);
+      localStorage.setItem('mystora_last_prenom', prenom);
+      localStorage.setItem('mystora_last_date', dateNaissance);
       setBlocked(true);
     } catch {
       setStep('form');
