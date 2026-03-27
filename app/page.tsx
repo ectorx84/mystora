@@ -3,9 +3,9 @@ import { useState, useRef, useEffect } from 'react';
 
 const LOADING_MESSAGES = [
   "Connexion aux astres...",
-  "Lecture de ton thème astral...",
-  "Analyse de tes énergies...",
-  "Calcul de tes vibrations...",
+  "Lecture de votre thème astral...",
+  "Analyse de vos énergies...",
+  "Calcul de vos vibrations...",
   "Un message se révèle..."
 ];
 
@@ -158,15 +158,15 @@ export default function Home() {
           <>
             <div className="text-center mb-6">
               <h1 className="text-4xl font-bold text-white tracking-tight">🔮 Mystora</h1>
-              <p className="text-[#D4A574] text-base mt-2 font-medium">Découvre ton message personnel</p>
-              <p className="text-gray-400 text-sm mt-1">Astrologie, tarot et numérologie dans une analyse gratuite</p>
+              <p className="text-[#D4A574] text-base mt-2 font-medium">Découvrez ce que les astres révèlent sur vous</p>
             </div>
 
             <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-7 w-full max-w-sm shadow-2xl border border-purple-500/10">
+              <h2 className="text-white text-xl font-semibold text-center mb-5">Votre profil gratuit</h2>
               <div className="flex flex-col gap-4">
                 <input
                   type="text"
-                  placeholder="Ton prénom"
+                  placeholder="Votre prénom"
                   value={prenom}
                   onChange={(e) => setPrenom(e.target.value)}
                   className="bg-[#0F0D2E] text-white placeholder-gray-400 rounded-xl px-4 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-lg"
@@ -190,18 +190,15 @@ export default function Home() {
                 <button onClick={handleSubmit}
                   disabled={!prenom || !dateNaissance || blocked}
                   className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 text-white font-bold py-4 rounded-xl transition-all duration-300 mt-1 disabled:opacity-60 text-lg shadow-lg shadow-purple-900/30">
-                  {blocked ? '🔒 Test gratuit utilisé' : '✨ Découvrir mon message'}
+                  {blocked ? '🔒 Test gratuit utilisé' : '✨ Découvrir mon profil'}
                 </button>
-                {!blocked && (
-                  <p className="text-gray-500 text-xs text-center">Gratuit • Sans carte bancaire • Résultat immédiat</p>
-                )}
               </div>
             </div>
 
             {/* CTA payant quand test déjà utilisé */}
             {blocked && (
               <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20 mt-4 w-full max-w-sm">
-                <h3 className="text-white text-center font-semibold text-lg mb-1">✨ Ton rapport complet est prêt</h3>
+                <h3 className="text-white text-center font-semibold text-lg mb-1">✨ Votre rapport complet est prêt</h3>
                 <p className="text-gray-300 text-sm text-center mb-4">
                   Profil astral détaillé • Amour • Carrière • Blocages • Chemin de vie • Prévisions
                 </p>
@@ -210,7 +207,7 @@ export default function Home() {
                   {payLoading ? '⏳ Redirection...' : 'Débloquer mon rapport complet — 4,90€'}
                 </button>
                 {(!prenom || !dateNaissance) && (
-                  <p className="text-gray-400 text-xs text-center mt-2">Entre ton prénom et ta date ci-dessus</p>
+                  <p className="text-gray-400 text-xs text-center mt-2">Entrez votre prénom et votre date ci-dessus</p>
                 )}
                 <div className="flex items-center justify-center gap-4 mt-3 text-gray-400 text-xs">
                   <span>🔒 Paiement sécurisé</span>
@@ -231,7 +228,7 @@ export default function Home() {
               </div>
             </div>
             <p className="text-purple-200 text-lg font-medium animate-pulse">{LOADING_MESSAGES[loadingIdx]}</p>
-            <p className="text-gray-500 text-sm mt-2">{prenom}, les astres s&apos;alignent pour toi...</p>
+            <p className="text-gray-500 text-sm mt-2">{prenom}, les astres s&apos;alignent pour vous...</p>
             <div className="flex gap-2 mt-6">
               {[0,1,2,3,4].map(i => (
                 <div key={i} className={`w-2 h-2 rounded-full transition-all duration-500 ${i <= loadingIdx ? 'bg-amber-400' : 'bg-gray-700'}`} />
@@ -258,19 +255,19 @@ export default function Home() {
               {/* Blurred content */}
               <div className="relative mt-4">
                 <div className="text-gray-300 text-[15px] leading-relaxed blur-[6px] select-none pointer-events-none" aria-hidden="true">
-                  <p className="mb-2">Ton thème astral révèle une période de transformation profonde qui va impacter tes relations et ta carrière de manière inattendue. Les alignements planétaires indiquent un tournant majeur.</p>
-                  <p className="mb-2">Côté amour, une rencontre ou une prise de conscience va bouleverser ta vision des choses. Côté carrière, une opportunité cachée se prépare.</p>
-                  <p>Ta numérologie personnelle confirme ce cycle de renouveau et révèle les dates clés à venir...</p>
+                  <p className="mb-2">Votre thème astral révèle une période de transformation profonde qui va impacter vos relations et votre carrière de manière inattendue. Les alignements planétaires indiquent un tournant majeur.</p>
+                  <p className="mb-2">Côté amour, une rencontre ou une prise de conscience va bouleverser votre vision des choses. Côté carrière, une opportunité cachée se prépare.</p>
+                  <p>Votre numérologie personnelle confirme ce cycle de renouveau et révèle les dates clés à venir...</p>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#1A1747]/50 to-[#1A1747] flex items-end justify-center pb-2">
-                  <p className="text-amber-200/80 text-sm">La suite de ton profil est prête...</p>
+                  <p className="text-amber-200/80 text-sm">La suite de votre profil est prête...</p>
                 </div>
               </div>
             </div>
 
             {/* CTA Card — priorité #1 */}
             <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20 mb-4">
-              <h3 className="text-white text-center font-semibold text-lg mb-1">✨ Ton rapport complet est prêt</h3>
+              <h3 className="text-white text-center font-semibold text-lg mb-1">✨ Votre rapport complet est prêt</h3>
               <p className="text-gray-300 text-sm text-center mb-4">
                 Profil astral détaillé • Amour • Carrière • Blocages • Chemin de vie • Prévisions
               </p>
@@ -287,11 +284,11 @@ export default function Home() {
             {/* Email capture — filet de rattrapage */}
             {!emailSent ? (
               <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
-                <p className="text-gray-400 text-sm text-center mb-3">Pas encore prêt(e) ? Reçois ta lecture par email</p>
+                <p className="text-gray-400 text-sm text-center mb-3">Pas encore prêt(e) ? Recevez votre lecture par email</p>
                 <div className="flex gap-2">
                   <input
                     type="email"
-                    placeholder="Ton email"
+                    placeholder="Votre email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="flex-1 bg-[#0F0D2E] text-white placeholder-gray-500 rounded-xl px-4 py-3 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-sm"
@@ -306,7 +303,7 @@ export default function Home() {
               </div>
             ) : (
               <div className="bg-[#1A1747]/60 rounded-2xl p-3 border border-purple-500/10 text-center">
-                <p className="text-[#D4A574] text-sm">✅ C&apos;est noté ! Tu recevras ta lecture à {email}</p>
+                <p className="text-[#D4A574] text-sm">✅ C&apos;est noté ! Vous recevrez votre lecture à {email}</p>
               </div>
             )}
 
@@ -348,3 +345,4 @@ export default function Home() {
     </main>
   );
 }
+
