@@ -15,6 +15,12 @@ export async function POST(request: NextRequest) {
       },
     ],
     mode: 'payment',
+    metadata: {
+      prenom,
+      dateNaissance,
+      email: email || '',
+      question: question || '',
+    },
     success_url: `${process.env.NEXT_PUBLIC_URL}/success?prenom=${encodeURIComponent(prenom)}&date=${encodeURIComponent(dateNaissance)}&email=${encodeURIComponent(email || '')}&question=${encodeURIComponent(question || '')}`,
     cancel_url: `${process.env.NEXT_PUBLIC_URL}/`,
   });
