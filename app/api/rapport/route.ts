@@ -217,5 +217,16 @@ Environ 800-1000 mots. Chaque section doit citer les vrais chiffres.`
     }).catch(() => {});
   }
 
+  // Tracking serveur — vente confirmée
+  const priceType = session.metadata?.priceType || 'standard';
+  console.log(`[MYSTORA_EVENT] ${JSON.stringify({
+    timestamp: new Date().toISOString(),
+    event: 'checkout_complete',
+    prenom,
+    country: session.metadata?.country || 'unknown',
+    priceType,
+    sessionId,
+  })}`);
+
   return NextResponse.json({ resultat: texte, prenom, email, partageId: id, partageUrl: blob.url });
 }

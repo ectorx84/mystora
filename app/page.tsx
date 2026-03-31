@@ -1,5 +1,14 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+
+// ===== TRACKING =====
+function trackEvent(event: string, data?: Record<string, string | number | boolean>) {
+  fetch('/api/track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ event, data: data || {} }),
+  }).catch(() => {});
+}
 
 const LOADING_MESSAGES = [
   "Connexion aux astres...",
@@ -32,6 +41,8 @@ export default function Home() {
     const params = new URLSearchParams(window.location.search);
     const prenomParam = params.get('prenom');
     if (prenomParam) setPrenom(prenomParam);
+    // Track landing
+    trackEvent('landing_view', { source: prenomParam ? 'manychat_or_brevo' : 'direct' });
   }, []);
 
   useEffect(() => {
@@ -107,6 +118,7 @@ export default function Home() {
 
   const handleSubmit = async () => {
     if (!prenom || !dateNaissance || blocked) return;
+    trackEvent('form_submit', { prenom_length: prenom.length });
     setStep('loading');
     setLoadingIdx(0);
     setResultat('');
@@ -120,6 +132,7 @@ export default function Home() {
       setResultat(data.resultat);
       setSigneInfo(data.signe || '');
       setStep('result');
+      trackEvent('teaser_view', { signe: data.signe || 'unknown' });
       localStorage.setItem('mystora_last_test', Date.now().toString());
       localStorage.setItem('mystora_last_result', data.resultat);
       localStorage.setItem('mystora_last_prenom', prenom);
@@ -133,6 +146,7 @@ export default function Home() {
 
   const handleEmailSubmit = async () => {
     if (!email.trim()) return;
+    trackEvent('email_submit');
     setEmailSent(true);
     try {
       await fetch('/api/subscribe', {
@@ -144,6 +158,7 @@ export default function Home() {
   };
 
   const handlePaiement = async () => {
+    trackEvent('cta_click', { price: displayPrice });
     setPayLoading(true);
     try {
       const res = await fetch('/api/checkout', {
@@ -152,6 +167,7 @@ export default function Home() {
         body: JSON.stringify({ prenom, dateNaissance, email: email.trim(), question: '' }),
       });
       const data = await res.json();
+      trackEvent('checkout_start');
       window.location.href = data.url;
     } catch {
       setPayLoading(false);
