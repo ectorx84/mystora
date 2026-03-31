@@ -142,7 +142,7 @@ RÈGLES ABSOLUES :
 - Phrase 1 : Attaque directe avec le prénom. Cite son signe (${zodiac.name}), son décan (${decan.num}e, influence ${decan.influence}) et son chemin de vie (${lifePath}). Fais une observation de personnalité tellement précise que le lecteur pense "comment il sait ça ?". Utilise les vrais chiffres.
 - Phrase 2 : Révèle quelque chose de troublant sur sa période actuelle (année perso ${personalYear}, mois perso ${personalMonth}). Sois concret : amour, argent, décision, blocage. Crée une tension.
 - Phrase 3 : Commence à révéler un secret lié à son nombre intime ${soulUrge} — puis COUPE NET au milieu. La phrase doit être INCOMPLÈTE. Le lecteur DOIT payer pour savoir la suite.
-- Tutoie, utilise le prénom
+- Vouvoie TOUJOURS (jamais de tutoiement). Utilise le prénom
 - Texte brut, pas de markdown, pas de titres, pas de gras
 - Ne mentionne jamais l'IA
 - Le tout doit faire entre 50 et 80 mots MAXIMUM`,

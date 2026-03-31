@@ -40,7 +40,7 @@ function SuccessContent() {
 
   const partagerWhatsApp = () => {
     const lien = `${window.location.origin}/partage/${partageId}`;
-    const message = `Je viens de découvrir mon profil astrologique complet grâce à l'IA 🔮 Regarde ce que les astres disent de moi... et découvre le tien : ${lien}`;
+    const message = `Je viens de découvrir mon profil astrologique complet sur Mystora 🔮 Regarde ce que les astres disent de moi... et découvre le tien : ${lien}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   };
 
