@@ -24,6 +24,7 @@ export default function Home() {
   const [jour, setJour] = useState('');
   const [mois, setMois] = useState('');
   const [annee, setAnnee] = useState('');
+  const [intention, setIntention] = useState('');
   const [resultat, setResultat] = useState('');
   const [signeInfo, setSigneInfo] = useState('');
   const [step, setStep] = useState<'form' | 'loading' | 'result'>('form');
@@ -118,7 +119,7 @@ export default function Home() {
 
   const handleSubmit = async () => {
     if (!prenom || !dateNaissance || blocked) return;
-    trackEvent('form_submit', { prenom_length: prenom.length });
+    trackEvent('form_submit', { prenom_length: prenom.length, intention: intention || 'none' });
     setStep('loading');
     setLoadingIdx(0);
     setResultat('');
@@ -126,7 +127,7 @@ export default function Home() {
       const res = await fetch('/api/astro', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, dateNaissance }),
+        body: JSON.stringify({ prenom, dateNaissance, intention }),
       });
       const data = await res.json();
       setResultat(data.resultat);
@@ -164,7 +165,7 @@ export default function Home() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, dateNaissance, email: email.trim(), question: '' }),
+        body: JSON.stringify({ prenom, dateNaissance, email: email.trim(), question: intention }),
       });
       const data = await res.json();
       trackEvent('checkout_start');
@@ -226,6 +227,29 @@ export default function Home() {
                       onChange={(e) => handleAnnee(e.target.value)}
                       className="bg-[#0F0D2E] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-2/4 text-center text-lg font-semibold transition-colors" />
                   </div>
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-gray-400 text-sm px-1">Qu&apos;aimeriez-vous éclaircir ?</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { value: 'amour', icon: '❤️', label: 'Amour' },
+                      { value: 'carriere', icon: '💼', label: 'Carrière' },
+                      { value: 'argent', icon: '💰', label: 'Argent' },
+                      { value: 'blocage', icon: '🔓', label: 'Blocage' },
+                    ].map((opt) => (
+                      <button key={opt.value} type="button"
+                        onClick={() => setIntention(intention === opt.value ? '' : opt.value)}
+                        className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium transition-all border ${
+                          intention === opt.value
+                            ? 'bg-purple-700/40 border-[#D4A574] text-white'
+                            : 'bg-[#0F0D2E] border-purple-700/40 text-gray-400 hover:border-purple-500/60'
+                        }`}>
+                        <span>{opt.icon}</span>
+                        <span>{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                  <p className="text-gray-500 text-xs px-1 mt-0.5">Optionnel — personnalise votre lecture</p>
                 </div>
                 <button onClick={handleSubmit}
                   disabled={!prenom || !dateNaissance || blocked}

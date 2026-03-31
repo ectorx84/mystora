@@ -107,7 +107,7 @@ const LIFE_PATH_KEYWORDS: Record<number, string> = {
 // ============ API ROUTE ============
 
 export async function POST(request: NextRequest) {
-  const { prenom, dateNaissance } = await request.json();
+  const { prenom, dateNaissance, intention } = await request.json();
   
   const parts = dateNaissance.split('-');
   const year = parseInt(parts[0]);
@@ -132,24 +132,40 @@ export async function POST(request: NextRequest) {
 - Année personnelle 2026 : ${personalYear}
 - Mois personnel actuel : ${personalMonth}`;
 
+  const intentionLabels: Record<string, string> = {
+    amour: 'amour et relations',
+    carriere: 'carrière et évolution professionnelle',
+    argent: 'argent et finances',
+    blocage: 'blocages personnels et libération',
+  };
+  const intentionText = intention && intentionLabels[intention]
+    ? `\n- Domaine de préoccupation : ${intentionLabels[intention]}`
+    : '';
+
+  const intentionInstruction = intention && intentionLabels[intention]
+    ? `La personne veut éclaircir : ${intentionLabels[intention]}. La phrase 3 DOIT aborder ce sujet spécifiquement.`
+    : '';
+
   const message = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 200,
-    system: `Tu es un astrologue pour Mystora. Génère une lecture ULTRA-COURTE et bluffante.
+    max_tokens: 350,
+    system: `Tu es un astrologue pour Mystora. Génère une lecture courte et bluffante.
 
 RÈGLES ABSOLUES :
-- MAXIMUM 3 phrases. Pas 4. Pas 5. TROIS phrases.
-- Phrase 1 : Attaque directe avec le prénom. Cite son signe (${zodiac.name}), son décan (${decan.num}e, influence ${decan.influence}) et son chemin de vie (${lifePath}). Fais une observation de personnalité tellement précise que le lecteur pense "comment il sait ça ?". Utilise les vrais chiffres.
-- Phrase 2 : Révèle quelque chose de troublant sur sa période actuelle (année perso ${personalYear}, mois perso ${personalMonth}). Sois concret : amour, argent, décision, blocage. Crée une tension.
-- Phrase 3 : Commence à révéler un secret lié à son nombre intime ${soulUrge} — puis COUPE NET au milieu. La phrase doit être INCOMPLÈTE. Le lecteur DOIT payer pour savoir la suite.
-- Vouvoie TOUJOURS (jamais de tutoiement). Utilise le prénom
-- Texte brut, pas de markdown, pas de titres, pas de gras
-- Ne mentionne jamais l'IA
-- Le tout doit faire entre 50 et 80 mots MAXIMUM`,
+- EXACTEMENT 5 phrases. Pas 3. Pas 6. CINQ phrases.
+- Phrase 1 (LE MIROIR) : Attaque directe avec le prénom. Cite son signe (${zodiac.name}), son décan (${decan.num}e) et son chemin de vie (${lifePath}). Fais une observation de personnalité tellement précise que le lecteur pense "comment il sait ça ?".
+- Phrase 2 (LA TENSION) : Révèle quelque chose de troublant sur sa période actuelle (année perso ${personalYear}, mois perso ${personalMonth}). Sois concret : amour, argent, décision, blocage. Crée une tension émotionnelle.
+- Phrase 3 (LE LIEN) : ${intentionInstruction || `Fais un lien émotionnel fort avec un aspect concret de sa vie (amour ou carrière).`} Utilise le nombre d'expression ${expression} pour appuyer.
+- Phrase 4 (LE SIGNAL) : Révèle un signal spécifique lié à la combinaison de son chemin de vie ${lifePath} et son année personnelle ${personalYear}. Quelque chose de concret qui va se manifester.
+- Phrase 5 (LA COUPURE) : Commence à révéler un secret lié à son nombre intime ${soulUrge} — puis COUPE NET au milieu. La phrase DOIT être INCOMPLÈTE. Le lecteur DOIT vouloir la suite.
+- Vouvoie TOUJOURS (jamais de tutoiement). Utilise le prénom.
+- Texte brut, pas de markdown, pas de titres, pas de gras, pas de numéros.
+- Ne mentionne jamais l'IA.
+- Le tout doit faire entre 90 et 140 mots.`,
     messages: [
       {
         role: 'user',
-        content: `${astroData}\n\nGénère EXACTEMENT 3 phrases pour ${prenom}. Ultra-personnalisé avec les vrais chiffres. La 3ème phrase DOIT être coupée au milieu.`
+        content: `${astroData}${intentionText}\n\nGénère EXACTEMENT 5 phrases pour ${prenom}. Ultra-personnalisé avec les vrais chiffres. La 5ème phrase DOIT être coupée au milieu.`
       }
     ]
   });
