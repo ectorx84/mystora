@@ -16,6 +16,7 @@ export default function Home() {
   const [mois, setMois] = useState('');
   const [annee, setAnnee] = useState('');
   const [resultat, setResultat] = useState('');
+  const [signeInfo, setSigneInfo] = useState('');
   const [step, setStep] = useState<'form' | 'loading' | 'result'>('form');
   const [loadingIdx, setLoadingIdx] = useState(0);
   const [payLoading, setPayLoading] = useState(false);
@@ -28,7 +29,6 @@ export default function Home() {
     fetch('/api/geo').then(r => r.json()).then(d => {
       if (d.price) setDisplayPrice(d.price);
     }).catch(() => {});
-    // Pré-remplir prénom depuis URL (ManyChat, Brevo, etc.)
     const params = new URLSearchParams(window.location.search);
     const prenomParam = params.get('prenom');
     if (prenomParam) setPrenom(prenomParam);
@@ -45,13 +45,14 @@ export default function Home() {
         const h = Math.floor(remaining / 3600000);
         const m = Math.floor((remaining % 3600000) / 60000);
         setTimeLeft(`${h}h${m.toString().padStart(2, '0')}`);
-        // Restore previous result
         const savedResult = localStorage.getItem('mystora_last_result');
         const savedPrenom = localStorage.getItem('mystora_last_prenom');
         const savedDate = localStorage.getItem('mystora_last_date');
+        const savedSigne = localStorage.getItem('mystora_last_signe');
         if (savedResult && savedPrenom) {
           setResultat(savedResult);
           setPrenom(savedPrenom);
+          if (savedSigne) setSigneInfo(savedSigne);
           if (savedDate) {
             const parts = savedDate.split('-');
             if (parts.length === 3) {
@@ -63,10 +64,10 @@ export default function Home() {
           setStep('result');
         }
       } else {
-        // 24h passed, clean up
         localStorage.removeItem('mystora_last_result');
         localStorage.removeItem('mystora_last_prenom');
         localStorage.removeItem('mystora_last_date');
+        localStorage.removeItem('mystora_last_signe');
       }
     }
   }, []);
@@ -117,11 +118,13 @@ export default function Home() {
       });
       const data = await res.json();
       setResultat(data.resultat);
+      setSigneInfo(data.signe || '');
       setStep('result');
       localStorage.setItem('mystora_last_test', Date.now().toString());
       localStorage.setItem('mystora_last_result', data.resultat);
       localStorage.setItem('mystora_last_prenom', prenom);
       localStorage.setItem('mystora_last_date', dateNaissance);
+      localStorage.setItem('mystora_last_signe', data.signe || '');
       setBlocked(true);
     } catch {
       setStep('form');
@@ -155,6 +158,15 @@ export default function Home() {
     }
   };
 
+  const REPORT_SECTIONS = [
+    { icon: '🌟', label: 'Profil astral complet', detail: 'signe, décan, planète dominante' },
+    { icon: '❤️', label: 'Vie amoureuse', detail: 'compatibilités, périodes clés' },
+    { icon: '💼', label: 'Carrière & finances', detail: 'opportunités, blocages à lever' },
+    { icon: '🔢', label: 'Numérologie complète', detail: 'chemin de vie, expression, âme' },
+    { icon: '📅', label: 'Prévisions 2026', detail: 'année & mois personnel' },
+    { icon: '🔑', label: 'Conseil personnalisé', detail: 'guidance spécifique pour vous' },
+  ];
+
   return (
     <main className="min-h-screen bg-[#0F0D2E] relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
@@ -173,7 +185,8 @@ export default function Home() {
             </div>
 
             <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-7 w-full max-w-sm shadow-2xl border border-purple-500/10">
-              <h2 className="text-white text-xl font-semibold text-center mb-5">Votre profil gratuit</h2>
+              <h2 className="text-white text-xl font-semibold text-center mb-1">Votre profil gratuit</h2>
+              <p className="text-gray-400 text-sm text-center mb-5">30 secondes • 100% gratuit</p>
               <div className="flex flex-col gap-4">
                 <input
                   type="text"
@@ -226,6 +239,16 @@ export default function Home() {
                 </div>
               </div>
             )}
+
+            {/* Mini preuve sociale sous le formulaire */}
+            <div className="mt-6 flex items-center gap-2 text-gray-400 text-sm">
+              <div className="flex -space-x-2">
+                <div className="w-7 h-7 rounded-full bg-purple-700 flex items-center justify-center text-xs text-white border-2 border-[#0F0D2E]">S</div>
+                <div className="w-7 h-7 rounded-full bg-amber-600 flex items-center justify-center text-xs text-white border-2 border-[#0F0D2E]">K</div>
+                <div className="w-7 h-7 rounded-full bg-purple-500 flex items-center justify-center text-xs text-white border-2 border-[#0F0D2E]">F</div>
+              </div>
+              <span>+2 400 profils générés ce mois</span>
+            </div>
           </>
         )}
 
@@ -263,32 +286,44 @@ export default function Home() {
               </div>
               <div className="text-gray-200 text-[15px] leading-relaxed whitespace-pre-line">{resultat}</div>
 
-              {/* Blurred content */}
+              {/* Blurred content — personnalisé */}
               <div className="relative mt-4">
                 <div className="text-gray-300 text-[15px] leading-relaxed blur-[6px] select-none pointer-events-none" aria-hidden="true">
-                  <p className="mb-2">Votre thème astral révèle une période de transformation profonde qui va impacter vos relations et votre carrière de manière inattendue. Les alignements planétaires indiquent un tournant majeur.</p>
-                  <p className="mb-2">Côté amour, une rencontre ou une prise de conscience va bouleverser votre vision des choses. Côté carrière, une opportunité cachée se prépare.</p>
-                  <p>Votre numérologie personnelle confirme ce cycle de renouveau et révèle les dates clés à venir...</p>
+                  <p className="mb-2">{prenom}, votre profil astral révèle une période de transformation profonde qui va impacter vos relations et votre carrière de manière inattendue. {signeInfo ? `En tant que ${signeInfo}, l` : 'L'}es alignements planétaires indiquent un tournant majeur dans les semaines à venir.</p>
+                  <p className="mb-2">Côté amour, une rencontre ou une prise de conscience va bouleverser votre vision des choses. Votre chemin de vie indique un potentiel inexploité en matière financière.</p>
+                  <p>Votre numérologie personnelle confirme ce cycle de renouveau et révèle les dates clés à surveiller absolument...</p>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#1A1747]/50 to-[#1A1747] flex items-end justify-center pb-2">
-                  <p className="text-amber-200/80 text-sm">La suite de votre profil est prête...</p>
+                  <p className="text-amber-200/80 text-sm font-medium">⬇️ 6 sections complètes vous attendent</p>
                 </div>
               </div>
             </div>
 
             {/* CTA Card — priorité #1 */}
             <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20 mb-4">
-              <h3 className="text-white text-center font-semibold text-lg mb-1">✨ Votre rapport complet est prêt</h3>
-              <p className="text-gray-300 text-sm text-center mb-4">
-                Profil astral détaillé • Amour • Carrière • Blocages • Chemin de vie • Prévisions
-              </p>
+              <h3 className="text-white text-center font-semibold text-lg mb-3">Votre rapport complet contient :</h3>
+              
+              {/* Sections visuelles du rapport */}
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {REPORT_SECTIONS.map((s, i) => (
+                  <div key={i} className="bg-[#0F0D2E]/60 rounded-xl px-3 py-2.5 border border-purple-700/20">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-base">{s.icon}</span>
+                      <span className="text-white text-sm font-medium">{s.label}</span>
+                    </div>
+                    <p className="text-gray-400 text-xs mt-0.5 pl-6">{s.detail}</p>
+                  </div>
+                ))}
+              </div>
+
               <button onClick={handlePaiement} disabled={payLoading}
                 className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
-                {payLoading ? '⏳ Redirection...' : `Débloquer mon rapport complet — ${displayPrice}`}
+                {payLoading ? '⏳ Redirection...' : `Voir mon rapport complet — ${displayPrice}`}
               </button>
               <div className="flex items-center justify-center gap-4 mt-3 text-gray-400 text-xs">
                 <span>🔒 Paiement sécurisé</span>
                 <span>⚡ Résultat instantané</span>
+                <span>📧 Envoi par email</span>
               </div>
             </div>
 
@@ -326,14 +361,14 @@ export default function Home() {
                   <span className="text-amber-400 text-sm">★★★★★</span>
                   <span className="text-white text-sm font-medium">Sarah M.</span>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">&quot;J&apos;ai eu des frissons en lisant mon rapport. Il a décrit exactement ce que je traverse en ce moment avec mon ex. Le chemin de vie était tellement précis que j&apos;en suis restée bouche bée.&quot;</p>
+                <p className="text-gray-300 text-sm leading-relaxed">&quot;J&apos;ai eu des frissons en lisant mon rapport. Il a décrit exactement ce que je traverse en ce moment. Le chemin de vie était tellement précis que j&apos;en suis restée bouche bée.&quot;</p>
               </div>
               <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-amber-400 text-sm">★★★★★</span>
                   <span className="text-white text-sm font-medium">Karim L.</span>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">&quot;Au début je pensais que c&apos;était du blabla mais quand j&apos;ai lu la partie sur ma carrière et mon année personnelle... tout colle. J&apos;ai même partagé avec ma copine, elle a halluciné aussi.&quot;</p>
+                <p className="text-gray-300 text-sm leading-relaxed">&quot;Au début je pensais que c&apos;était du blabla mais quand j&apos;ai lu la partie sur ma carrière et mon année personnelle... tout colle. J&apos;ai même partagé avec ma copine.&quot;</p>
               </div>
               <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
                 <div className="flex items-center gap-2 mb-1.5">
@@ -356,4 +391,3 @@ export default function Home() {
     </main>
   );
 }
-

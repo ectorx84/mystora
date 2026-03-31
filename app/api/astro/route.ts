@@ -156,5 +156,5 @@ RÈGLES ABSOLUES :
 
   const texte = message.content[0].type === 'text' ? message.content[0].text : '';
   
-  return NextResponse.json({ resultat: texte });
+  return NextResponse.json({ resultat: texte, signe: zodiac.name });
 }
