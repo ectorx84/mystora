@@ -34,10 +34,12 @@ export default function Home() {
   const [timeLeft, setTimeLeft] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [displayPrice, setDisplayPrice] = useState('4,90€');
+  const [anchorPrice, setAnchorPrice] = useState('14,90€');
 
   useEffect(() => {
     fetch('/api/geo').then(r => r.json()).then(d => {
       if (d.price) setDisplayPrice(d.price);
+      if (d.isAfrica) setAnchorPrice('5,90€');
     }).catch(() => {});
     const params = new URLSearchParams(window.location.search);
     const prenomParam = params.get('prenom');
@@ -266,6 +268,11 @@ export default function Home() {
                 <p className="text-gray-300 text-sm text-center mb-4">
                   Profil astral détaillé • Amour • Carrière • Blocages • Chemin de vie • Prévisions
                 </p>
+                <div className="text-center mb-3">
+                  <span className="text-gray-400 line-through text-sm">{anchorPrice}</span>
+                  <span className="text-amber-400 font-bold text-xl ml-2">{displayPrice}</span>
+                  <span className="text-amber-300/70 text-xs ml-2">offre de lancement</span>
+                </div>
                 <button onClick={handlePaiement} disabled={payLoading || !prenom || !dateNaissance}
                   className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
                   {payLoading ? '⏳ Redirection...' : `Débloquer mon rapport complet — ${displayPrice}`}
@@ -354,6 +361,12 @@ export default function Home() {
                     <p className="text-gray-400 text-xs mt-0.5 pl-6">{s.detail}</p>
                   </div>
                 ))}
+              </div>
+
+              <div className="text-center mb-3">
+                <span className="text-gray-400 line-through text-sm">{anchorPrice}</span>
+                <span className="text-amber-400 font-bold text-xl ml-2">{displayPrice}</span>
+                <span className="text-amber-300/70 text-xs ml-2">offre de lancement</span>
               </div>
 
               <button onClick={handlePaiement} disabled={payLoading}
