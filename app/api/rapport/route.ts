@@ -160,7 +160,18 @@ export async function POST(request: NextRequest) {
 - Mois personnel actuel : ${personalMonth}
 - Signes les plus compatibles : ${compatible.join(', ')}`;
 
-  const questionContext = question ? `\n\nIMPORTANT : La personne a posé cette question : "${question}". Commence le rapport en répondant directement à cette question en utilisant les données astro-numérologiques réelles, PUIS enchaîne avec le profil complet.` : '';
+  const intentionLabels: Record<string, string> = {
+    amour: "la personne souhaite éclaircir sa vie amoureuse et ses relations. Commence le rapport par une section dédiée à l'amour, aux compatibilités et aux énergies relationnelles actuelles, PUIS enchaîne avec le profil complet.",
+    carriere: "la personne souhaite éclaircir sa carrière et son évolution professionnelle. Commence le rapport par une section dédiée à la carrière, aux opportunités et aux blocages professionnels actuels, PUIS enchaîne avec le profil complet.",
+    argent: "la personne souhaite éclaircir sa situation financière. Commence le rapport par une section dédiée à l'argent, aux flux financiers et aux périodes favorables pour les décisions financières, PUIS enchaîne avec le profil complet.",
+    blocage: "la personne ressent un blocage personnel et cherche à s'en libérer. Commence le rapport par une section dédiée aux blocages identifiés dans son thème, leurs origines et les clés pour les dépasser, PUIS enchaîne avec le profil complet.",
+  };
+
+  const questionContext = question && intentionLabels[question]
+    ? `\n\nIMPORTANT : ${intentionLabels[question]}`
+    : question
+      ? `\n\nIMPORTANT : La personne a posé cette question : "${question}". Commence le rapport en répondant directement à cette question en utilisant les données astro-numérologiques réelles, PUIS enchaîne avec le profil complet.`
+      : '';
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
