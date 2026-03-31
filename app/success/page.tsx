@@ -4,39 +4,43 @@ import { useSearchParams } from 'next/navigation';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
-  const prenom = searchParams.get('prenom') || '';
-  const date = searchParams.get('date') || '';
-  const email = searchParams.get('email') || '';
-  const question = searchParams.get('question') || '';
+  const sessionId = searchParams.get('session_id') || '';
   const [rapport, setRapport] = useState('');
+  const [prenom, setPrenom] = useState('');
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
-  const [emailEnvoye, setEmailEnvoye] = useState(false);
+  const [error, setError] = useState('');
   const [copie, setCopie] = useState(false);
   const [partageId, setPartageId] = useState('');
 
   useEffect(() => {
-    if (prenom && date) {
-      fetch('/api/rapport', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prenom, dateNaissance: date, email, question }),
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setRapport(data.resultat);
-          setPartageId(data.partageId);
-          setLoading(false);
-          if (email && !emailEnvoye) {
-            fetch('/api/send-rapport', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email, prenom, rapport: data.resultat }),
-            });
-            setEmailEnvoye(true);
-          }
-        });
+    if (!sessionId) {
+      setError('Lien invalide. Veuillez passer par le processus de paiement.');
+      setLoading(false);
+      return;
     }
-  }, [prenom, date]);
+
+    fetch('/api/rapport', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Paiement non vérifié');
+        return res.json();
+      })
+      .then((data) => {
+        setRapport(data.resultat);
+        setPrenom(data.prenom || '');
+        setEmail(data.email || '');
+        setPartageId(data.partageId);
+        setLoading(false);
+      })
+      .catch(() => {
+        setError('Impossible de vérifier votre paiement. Si vous avez payé, contactez-nous à contact@mystora.fr');
+        setLoading(false);
+      });
+  }, [sessionId]);
 
   const partagerWhatsApp = () => {
     const lien = `${window.location.origin}/partage/${partageId}`;
@@ -55,13 +59,18 @@ function SuccessContent() {
     <main className="min-h-screen bg-[#1E1B4B] flex flex-col items-center px-4 py-12">
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-white mb-2">🔮 Mystora</h1>
-        <p className="text-[#D4A574] text-lg">Votre rapport complet, {prenom}</p>
+        {prenom && <p className="text-[#D4A574] text-lg">Votre rapport complet, {prenom}</p>}
       </div>
 
       <div className="bg-[#2D2A6E] rounded-2xl p-8 w-full max-w-2xl shadow-xl">
         {loading ? (
           <div className="text-center py-12">
             <p className="text-[#D4A574] text-xl animate-pulse">✨ Les astres révèlent votre destinée...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-red-400 text-lg mb-4">⚠️ {error}</p>
+            <a href="/" className="text-[#D4A574] underline">Retour à l&apos;accueil</a>
           </div>
         ) : (
           <>

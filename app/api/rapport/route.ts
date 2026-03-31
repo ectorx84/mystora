@@ -102,8 +102,35 @@ function getCompatibleSigns(signName: string): string[] {
 // ============ API ROUTE ============
 
 export async function POST(request: NextRequest) {
-  const { prenom, dateNaissance, email, question } = await request.json();
+  const { sessionId } = await request.json();
   
+  if (!sessionId) {
+    return NextResponse.json({ error: 'Session manquante' }, { status: 400 });
+  }
+
+  // Vérifier le paiement Stripe
+  const stripe = new (await import('stripe')).default(process.env.STRIPE_SECRET_KEY!);
+  let session;
+  try {
+    session = await stripe.checkout.sessions.retrieve(sessionId);
+  } catch {
+    return NextResponse.json({ error: 'Session invalide' }, { status: 400 });
+  }
+
+  if (session.payment_status !== 'paid') {
+    return NextResponse.json({ error: 'Paiement non confirmé' }, { status: 403 });
+  }
+
+  // Récupérer les données depuis les metadata Stripe (source de vérité)
+  const prenom = session.metadata?.prenom || '';
+  const dateNaissance = session.metadata?.dateNaissance || '';
+  const email = session.metadata?.email || '';
+  const question = session.metadata?.question || '';
+
+  if (!prenom || !dateNaissance) {
+    return NextResponse.json({ error: 'Données incomplètes' }, { status: 400 });
+  }
+
   const parts = dateNaissance.split('-');
   const year = parseInt(parts[0]);
   const month = parseInt(parts[1]);
@@ -150,7 +177,7 @@ RÈGLES :
 - Utilise "tendances", "énergies", "potentiel" — jamais "prédit" ou "certain"
 - Ne mentionne JAMAIS l'IA
 - Texte brut uniquement, pas de markdown, pas de **, pas de #
-- Tutoie, utilise le prénom`,
+- Vouvoie TOUJOURS (jamais de tutoiement). Utilise le prénom`,
     messages: [
       {
         role: 'user',
@@ -181,5 +208,14 @@ Environ 800-1000 mots. Chaque section doit citer les vrais chiffres.`
     id, prenom, dateNaissance, email: email || '', question: question || '', dateCreation, rapport: texte,
   }), { access: 'public' });
 
-  return NextResponse.json({ resultat: texte, partageId: id, partageUrl: blob.url });
+  // Envoi email automatique si disponible
+  if (email) {
+    fetch(`${process.env.NEXT_PUBLIC_URL}/api/send-rapport`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, prenom, rapport: texte }),
+    }).catch(() => {});
+  }
+
+  return NextResponse.json({ resultat: texte, prenom, email, partageId: id, partageUrl: blob.url });
 }

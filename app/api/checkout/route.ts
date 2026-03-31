@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
       country,
       priceType: isAfrica ? 'africa' : 'standard',
     },
-    success_url: `${process.env.NEXT_PUBLIC_URL}/success?prenom=${encodeURIComponent(prenom)}&date=${encodeURIComponent(dateNaissance)}&email=${encodeURIComponent(email || '')}&question=${encodeURIComponent(question || '')}`,
+    success_url: `${process.env.NEXT_PUBLIC_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.NEXT_PUBLIC_URL}/`,
   });
 
