@@ -28,6 +28,10 @@ export default function Home() {
     fetch('/api/geo').then(r => r.json()).then(d => {
       if (d.price) setDisplayPrice(d.price);
     }).catch(() => {});
+    // Pré-remplir prénom depuis URL (ManyChat, Brevo, etc.)
+    const params = new URLSearchParams(window.location.search);
+    const prenomParam = params.get('prenom');
+    if (prenomParam) setPrenom(prenomParam);
   }, []);
 
   useEffect(() => {
