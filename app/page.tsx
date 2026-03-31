@@ -22,6 +22,13 @@ export default function Home() {
   const [blocked, setBlocked] = useState(false);
   const [timeLeft, setTimeLeft] = useState('');
   const [emailSent, setEmailSent] = useState(false);
+  const [displayPrice, setDisplayPrice] = useState('4,90€');
+
+  useEffect(() => {
+    fetch('/api/geo').then(r => r.json()).then(d => {
+      if (d.price) setDisplayPrice(d.price);
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const lastTest = localStorage.getItem('mystora_last_test');
@@ -204,7 +211,7 @@ export default function Home() {
                 </p>
                 <button onClick={handlePaiement} disabled={payLoading || !prenom || !dateNaissance}
                   className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
-                  {payLoading ? '⏳ Redirection...' : 'Débloquer mon rapport complet — 4,90€'}
+                  {payLoading ? '⏳ Redirection...' : `Débloquer mon rapport complet — ${displayPrice}`}
                 </button>
                 {(!prenom || !dateNaissance) && (
                   <p className="text-gray-400 text-xs text-center mt-2">Entrez votre prénom et votre date ci-dessus</p>
@@ -273,7 +280,7 @@ export default function Home() {
               </p>
               <button onClick={handlePaiement} disabled={payLoading}
                 className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
-                {payLoading ? '⏳ Redirection...' : 'Débloquer mon rapport complet — 4,90€'}
+                {payLoading ? '⏳ Redirection...' : `Débloquer mon rapport complet — ${displayPrice}`}
               </button>
               <div className="flex items-center justify-center gap-4 mt-3 text-gray-400 text-xs">
                 <span>🔒 Paiement sécurisé</span>
@@ -329,7 +336,7 @@ export default function Home() {
                   <span className="text-amber-400 text-sm">★★★★★</span>
                   <span className="text-white text-sm font-medium">Fatou D.</span>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">&quot;4,90€ pour un rapport aussi complet c&apos;est donné. Ma voyante me prend 50€ pour me dire la même chose en moins détaillé. Je recommande à 100%.&quot;</p>
+                <p className="text-gray-300 text-sm leading-relaxed">&quot;{displayPrice} pour un rapport aussi complet c&apos;est donné. Ma voyante me prend 50€ pour me dire la même chose en moins détaillé. Je recommande à 100%.&quot;</p>
               </div>
             </div>
 
