@@ -439,7 +439,7 @@ export default function Home() {
           </div>
         )}
 
-        <p className="text-gray-600 text-xs mt-8">Contenu de divertissement — mystora.fr</p>
+        <p className="text-gray-600 text-xs mt-8">Contenu de divertissement — mystora.fr · <a href="/mentions-legales" className="underline hover:text-gray-400">Mentions légales</a></p>
       </div>
     </main>
   );

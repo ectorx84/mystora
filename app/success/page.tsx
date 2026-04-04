@@ -99,7 +99,7 @@ function SuccessContent() {
         )}
       </div>
 
-      <p className="text-gray-500 text-sm mt-6">Divertissement</p>
+      <p className="text-gray-500 text-sm mt-6">Divertissement · <a href="/mentions-legales" className="underline hover:text-gray-400">Mentions légales</a></p>
     </main>
   );
 }
