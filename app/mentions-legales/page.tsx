@@ -126,14 +126,11 @@ export default function MentionsLegales() {
           </p>
         </section>
 
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-white mb-3">Contact</h2>
-          <p>
-            <a href="mailto:contact@mystora.fr" className="text-purple-400 hover:underline">contact@mystora.fr</a>
-          </p>
-        </section>
+        <p className="text-gray-600 text-xs mt-4">
+          Contact : <a href="mailto:contact@mystora.fr" className="hover:text-gray-400">contact@mystora.fr</a>
+        </p>
 
-        <div className="border-t border-purple-900/40 pt-6 mt-12 text-center">
+        <div className="border-t border-purple-900/40 pt-6 mt-8 text-center">
           <Link href="/" className="text-purple-400 hover:text-purple-300 text-sm">
             ← Retour à Mystora
           </Link>
