@@ -54,7 +54,7 @@ export default function MentionsLegales() {
           </p>
           <p className="mt-3">
             Pour exercer vos droits, contactez-nous à{" "}
-            <a href="mailto:contact@mystora.fr" className="text-purple-400 hover:underline">contact@mystora.fr</a>.
+            <a href="mailto:contact@mystora.fr" className="underline hover:text-gray-100">contact@mystora.fr</a>.
           </p>
         </section>
 
