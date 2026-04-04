@@ -82,7 +82,7 @@ export default function MentionsLegales() {
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-white mb-3">Cookies</h2>
           <p>
-            Le site utilise un cookie technique (<code className="text-purple-400">mystora_free</code>)
+            Le site utilise un cookie technique (<code className="text-gray-300">mystora_free</code>)
             pour limiter les demandes de guidance gratuite. Ce cookie est strictement
             nécessaire au fonctionnement du service et ne nécessite pas de consentement.
           </p>
