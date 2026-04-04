@@ -22,10 +22,7 @@ export default function MentionsLegales() {
         <section className="mb-8">
           <h2 className="text-lg font-semibold text-white mb-3">Éditeur du site</h2>
           <p>
-            Mystora.fr est édité par Sylvain Mercier, micro-entrepreneur.<br />
-            SIRET : 822 737 839 00032<br />
-            Adresse : 486 Route Du Camp Jacob, 97120 Saint-Claude, Guadeloupe<br />
-            Email : <a href="mailto:contact@mystora.fr" className="text-purple-400 hover:underline">contact@mystora.fr</a>
+            Contact : <a href="mailto:contact@mystora.fr" className="text-purple-400 hover:underline">contact@mystora.fr</a>
           </p>
         </section>
 
