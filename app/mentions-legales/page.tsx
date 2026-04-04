@@ -20,20 +20,6 @@ export default function MentionsLegales() {
         <p className="text-sm text-gray-500 mb-10">Dernière mise à jour : 4 avril 2026</p>
 
         <section className="mb-8">
-          <h2 className="text-lg font-semibold text-white mb-3">Éditeur du site</h2>
-          <p>
-            Contact : <a href="mailto:contact@mystora.fr" className="text-purple-400 hover:underline">contact@mystora.fr</a>
-          </p>
-        </section>
-
-        <section className="mb-8">
-          <h2 className="text-lg font-semibold text-white mb-3">Hébergement</h2>
-          <p>
-            Le site est hébergé par Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis.
-          </p>
-        </section>
-
-        <section className="mb-8">
           <h2 className="text-lg font-semibold text-white mb-3">Nature du service</h2>
           <p>
             Mystora propose un service de guidance personnalisée à caractère divertissant,
@@ -130,6 +116,20 @@ export default function MentionsLegales() {
             Les présentes mentions légales sont régies par le droit français. En cas de
             litige, les tribunaux compétents seront ceux du ressort du siège de
             l&apos;éditeur.
+          </p>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-lg font-semibold text-white mb-3">Hébergement</h2>
+          <p>
+            Le site est hébergé par Vercel Inc., 340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis.
+          </p>
+        </section>
+
+        <section className="mb-8">
+          <h2 className="text-lg font-semibold text-white mb-3">Contact</h2>
+          <p>
+            <a href="mailto:contact@mystora.fr" className="text-purple-400 hover:underline">contact@mystora.fr</a>
           </p>
         </section>
 
