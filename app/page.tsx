@@ -1,8 +1,14 @@
 'use client';
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { track } from '@vercel/analytics';
 
 // ===== TRACKING =====
 function trackEvent(event: string, data?: Record<string, string | number | boolean>) {
+  // Vercel Analytics — visible dans le dashboard Analytics > Events
+  try {
+    track(event, data || {});
+  } catch {}
+  // Backup serveur — visible dans Vercel Function Logs
   fetch('/api/track', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
