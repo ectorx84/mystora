@@ -392,14 +392,14 @@ export default function Home() {
         {step === 'result' && (
           <div ref={resultRef} className="w-full max-w-md">
             <div className="text-center mb-5">
-              <h1 className="text-3xl font-bold text-white">🔮 Mystora</h1>
+              <h1 className="text-3xl font-bold text-white">✦ Mystora</h1>
             </div>
 
             {/* Résultat gratuit */}
             <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border border-purple-500/10 mb-4">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xl">✨</span>
-                <h2 className="text-white text-lg font-semibold">{prenom}, voici ce que les astres révèlent</h2>
+                <h2 className="text-white text-lg font-semibold">{prenom}, voici votre message</h2>
               </div>
               <div className="text-gray-200 text-[15px] leading-relaxed whitespace-pre-line">{resultat}</div>
 
