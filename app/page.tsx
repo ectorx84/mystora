@@ -193,10 +193,73 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#0F0D2E] relative overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-900/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-amber-900/10 rounded-full blur-3xl" />
+    <main className="min-h-screen bg-[#080613] relative overflow-hidden">
+      {/* Nébuleuses animées */}
+      <div className="nebula nebula-1" />
+      <div className="nebula nebula-2" />
+      <div className="nebula nebula-3" />
+
+      {/* Étoiles scintillantes */}
+      <div className="stars-layer">
+        {[
+          { top: '5%', left: '10%', size: 3, dur: '3s', delay: '0s', white: false },
+          { top: '12%', left: '80%', size: 2, dur: '4s', delay: '1s', white: true },
+          { top: '20%', left: '25%', size: 2.5, dur: '3.5s', delay: '0.5s', white: false },
+          { top: '8%', left: '55%', size: 2, dur: '5s', delay: '2s', white: true },
+          { top: '30%', left: '70%', size: 3, dur: '4s', delay: '0.8s', white: false },
+          { top: '35%', left: '15%', size: 1.5, dur: '3s', delay: '1.5s', white: true },
+          { top: '45%', left: '90%', size: 2, dur: '4.5s', delay: '0.3s', white: false },
+          { top: '50%', left: '40%', size: 2.5, dur: '3s', delay: '2.5s', white: true },
+          { top: '55%', left: '5%', size: 3, dur: '5s', delay: '1.2s', white: false },
+          { top: '60%', left: '60%', size: 1.5, dur: '3.5s', delay: '0.7s', white: true },
+          { top: '65%', left: '85%', size: 2, dur: '4s', delay: '1.8s', white: false },
+          { top: '70%', left: '30%', size: 2.5, dur: '3s', delay: '0.2s', white: true },
+          { top: '75%', left: '50%', size: 3, dur: '4.5s', delay: '1s', white: false },
+          { top: '80%', left: '75%', size: 2, dur: '3.5s', delay: '2.2s', white: true },
+          { top: '85%', left: '20%', size: 1.5, dur: '5s', delay: '0.6s', white: false },
+          { top: '90%', left: '95%', size: 2.5, dur: '3s', delay: '1.4s', white: true },
+          { top: '15%', left: '45%', size: 2, dur: '4s', delay: '0.9s', white: false },
+          { top: '40%', left: '35%', size: 1.5, dur: '3.5s', delay: '2.8s', white: true },
+          { top: '25%', left: '92%', size: 3, dur: '5s', delay: '0.4s', white: false },
+          { top: '95%', left: '55%', size: 2, dur: '4.5s', delay: '1.6s', white: true },
+          { top: '3%', left: '38%', size: 2, dur: '3s', delay: '3s', white: false },
+          { top: '48%', left: '18%', size: 2.5, dur: '4s', delay: '0.1s', white: true },
+          { top: '72%', left: '8%', size: 1.5, dur: '3.5s', delay: '2.3s', white: false },
+          { top: '58%', left: '78%', size: 3, dur: '5s', delay: '1.1s', white: true },
+          { top: '88%', left: '42%', size: 2, dur: '4s', delay: '0.5s', white: false },
+        ].map((s, i) => (
+          <div key={`star-${i}`}
+            className={`star ${s.white ? 'star-white' : ''}`}
+            style={{
+              top: s.top, left: s.left,
+              width: `${s.size}px`, height: `${s.size}px`,
+              '--dur': s.dur, '--delay': s.delay,
+            } as React.CSSProperties}
+          />
+        ))}
+      </div>
+
+      {/* Particules dorées flottantes */}
+      <div className="stars-layer">
+        {[
+          { top: '20%', left: '15%', size: 5, dur: '8s', delay: '0s' },
+          { top: '40%', left: '75%', size: 4, dur: '10s', delay: '2s' },
+          { top: '60%', left: '45%', size: 6, dur: '12s', delay: '4s' },
+          { top: '80%', left: '25%', size: 4, dur: '9s', delay: '1s' },
+          { top: '30%', left: '85%', size: 5, dur: '11s', delay: '3s' },
+          { top: '70%', left: '55%', size: 3, dur: '7s', delay: '5s' },
+          { top: '10%', left: '65%', size: 4, dur: '10s', delay: '6s' },
+          { top: '50%', left: '10%', size: 5, dur: '9s', delay: '2.5s' },
+        ].map((p, i) => (
+          <div key={`particle-${i}`}
+            className="particle"
+            style={{
+              top: p.top, left: p.left,
+              width: `${p.size}px`, height: `${p.size}px`,
+              '--dur': p.dur, '--delay': p.delay,
+            } as React.CSSProperties}
+          />
+        ))}
       </div>
 
       <div className="relative z-10 flex flex-col items-center px-4 py-8 min-h-screen justify-center">
@@ -205,8 +268,9 @@ export default function Home() {
         {step === 'form' && (
           <>
             <div className="text-center mb-6">
-              <h1 className="text-4xl font-bold text-white tracking-tight">🔮 Mystora</h1>
-              <p className="text-[#D4A574] text-base mt-2 font-medium">Découvrez ce que les astres révèlent sur vous</p>
+              <div className="text-5xl mb-3">✦</div>
+              <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">Un message est caché<br/>dans votre prénom</h1>
+              <p className="text-shimmer text-base mt-3 font-medium">Découvrez-le en 30 secondes</p>
             </div>
 
             <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-7 w-full max-w-sm shadow-2xl border border-purple-500/10">
@@ -261,7 +325,7 @@ export default function Home() {
                 </div>
                 <button onClick={handleSubmit}
                   disabled={!prenom || !dateNaissance || blocked}
-                  className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 text-white font-bold py-4 rounded-xl transition-all duration-300 mt-1 disabled:opacity-60 text-lg shadow-lg shadow-purple-900/30">
+                  className="btn-glow bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 text-white font-bold py-4 rounded-xl transition-all duration-300 mt-1 disabled:opacity-60 text-lg shadow-lg shadow-purple-900/30">
                   {blocked ? '🔒 Test gratuit utilisé' : '✨ Découvrir mon profil'}
                 </button>
               </div>
