@@ -275,7 +275,7 @@ export default function Home() {
 
             <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-7 w-full max-w-sm shadow-2xl border border-purple-500/10">
               <h2 className="text-white text-xl font-semibold text-center mb-1">Votre profil gratuit</h2>
-              <p className="text-gray-400 text-sm text-center mb-5">30 secondes • 100% gratuit</p>
+              <p className="text-gray-400 text-sm text-center mb-5">Entrez votre prénom et date de naissance</p>
               <div className="flex flex-col gap-4">
                 <input
                   type="text"
