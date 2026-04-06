@@ -326,7 +326,7 @@ export default function Home() {
                 <button onClick={handleSubmit}
                   disabled={!prenom || !dateNaissance || blocked}
                   className="btn-glow bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 text-white font-bold py-4 rounded-xl transition-all duration-300 mt-1 disabled:opacity-60 text-lg shadow-lg shadow-purple-900/30">
-                  {blocked ? '🔒 Test gratuit utilisé' : '✨ Découvrir mon profil'}
+                  {blocked ? '🔒 Test gratuit utilisé' : '✨ Révéler mon message'}
                 </button>
               </div>
             </div>
