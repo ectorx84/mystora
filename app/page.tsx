@@ -184,12 +184,12 @@ export default function Home() {
   };
 
   const REPORT_SECTIONS = [
-    { icon: '🌟', label: 'Profil astral complet', detail: 'signe, décan, planète dominante' },
-    { icon: '❤️', label: 'Vie amoureuse', detail: 'compatibilités, périodes clés' },
-    { icon: '💼', label: 'Carrière & finances', detail: 'opportunités, blocages à lever' },
-    { icon: '🔢', label: 'Numérologie complète', detail: 'chemin de vie, expression, âme' },
-    { icon: '📅', label: 'Prévisions 2026', detail: 'année & mois personnel' },
-    { icon: '🔑', label: 'Conseil personnalisé', detail: 'guidance spécifique pour vous' },
+    { icon: '✦', label: 'Qui vous êtes vraiment', detail: 'votre nature profonde révélée' },
+    { icon: '❤️', label: 'Amour & relations', detail: 'ce que vous n\'osez pas voir' },
+    { icon: '💼', label: 'Carrière & argent', detail: 'le blocage caché à lever' },
+    { icon: '🔮', label: 'Vos forces secrètes', detail: 'ce que votre prénom révèle' },
+    { icon: '📅', label: 'Ce qui vous attend', detail: 'les mois clés à surveiller' },
+    { icon: '🔑', label: 'Votre guidance', detail: 'le conseil que vous attendiez' },
   ];
 
   return (
@@ -334,9 +334,9 @@ export default function Home() {
             {/* CTA payant quand test déjà utilisé */}
             {blocked && (
               <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20 mt-4 w-full max-w-sm">
-                <h3 className="text-white text-center font-semibold text-lg mb-1">✨ Votre rapport complet est prêt</h3>
+                <h3 className="text-white text-center font-semibold text-lg mb-1">✨ Votre message complet est prêt</h3>
                 <p className="text-gray-300 text-sm text-center mb-4">
-                  Profil astral détaillé • Amour • Carrière • Blocages • Chemin de vie • Prévisions
+                  Qui vous êtes vraiment • Amour • Carrière • Blocages • Ce qui vous attend • Guidance
                 </p>
                 <div className="text-center mb-3">
                   <span className="text-gray-400 line-through text-sm">{anchorPrice}</span>
@@ -345,7 +345,7 @@ export default function Home() {
                 </div>
                 <button onClick={handlePaiement} disabled={payLoading || !prenom || !dateNaissance}
                   className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
-                  {payLoading ? '⏳ Redirection...' : `Débloquer mon rapport complet — ${displayPrice}`}
+                  {payLoading ? '⏳ Redirection...' : `Lire mon message complet — ${displayPrice}`}
                 </button>
                 {(!prenom || !dateNaissance) && (
                   <p className="text-gray-400 text-xs text-center mt-2">Entrez votre prénom et votre date ci-dessus</p>
@@ -411,14 +411,14 @@ export default function Home() {
                   <p>Votre numérologie personnelle confirme ce cycle de renouveau et révèle les dates clés à surveiller absolument...</p>
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#1A1747]/50 to-[#1A1747] flex items-end justify-center pb-2">
-                  <p className="text-amber-200/80 text-sm font-medium">⬇️ 6 sections complètes vous attendent</p>
+                  <p className="text-amber-200/80 text-sm font-medium">⬇️ La suite de votre message vous attend</p>
                 </div>
               </div>
             </div>
 
             {/* CTA Card — priorité #1 */}
             <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20 mb-4">
-              <h3 className="text-white text-center font-semibold text-lg mb-3">Votre rapport complet contient :</h3>
+              <h3 className="text-white text-center font-semibold text-lg mb-3">La suite de votre message contient :</h3>
               
               {/* Sections visuelles du rapport */}
               <div className="grid grid-cols-2 gap-2 mb-4">
@@ -441,7 +441,7 @@ export default function Home() {
 
               <button onClick={handlePaiement} disabled={payLoading}
                 className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
-                {payLoading ? '⏳ Redirection...' : `Voir mon rapport complet — ${displayPrice}`}
+                {payLoading ? '⏳ Redirection...' : `Lire mon message complet — ${displayPrice}`}
               </button>
               <div className="flex items-center justify-center gap-4 mt-3 text-gray-400 text-xs">
                 <span>🔒 Paiement sécurisé</span>
@@ -453,7 +453,7 @@ export default function Home() {
             {/* Email capture — filet de rattrapage */}
             {!emailSent ? (
               <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
-                <p className="text-gray-400 text-sm text-center mb-3">Pas encore prêt(e) ? Recevez votre lecture par email</p>
+                <p className="text-gray-400 text-sm text-center mb-3">Pas encore prêt(e) ? Recevez votre message par email</p>
                 <div className="flex gap-2">
                   <input
                     type="email"
@@ -484,27 +484,27 @@ export default function Home() {
                   <span className="text-amber-400 text-sm">★★★★★</span>
                   <span className="text-white text-sm font-medium">Sarah M.</span>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">&quot;J&apos;ai eu des frissons en lisant mon rapport. Il a décrit exactement ce que je traverse en ce moment. Le chemin de vie était tellement précis que j&apos;en suis restée bouche bée.&quot;</p>
+                <p className="text-gray-300 text-sm leading-relaxed">&quot;J&apos;ai eu des frissons en lisant mon message. Il décrit exactement ce que je traverse en ce moment. C&apos;était tellement précis que j&apos;en suis restée bouche bée.&quot;</p>
               </div>
               <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-amber-400 text-sm">★★★★★</span>
                   <span className="text-white text-sm font-medium">Karim L.</span>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">&quot;Au début je pensais que c&apos;était du blabla mais quand j&apos;ai lu la partie sur ma carrière et mon année personnelle... tout colle. J&apos;ai même partagé avec ma copine.&quot;</p>
+                <p className="text-gray-300 text-sm leading-relaxed">&quot;Au début je pensais que c&apos;était du blabla mais quand j&apos;ai lu la partie sur ma carrière... tout colle. J&apos;ai même partagé avec ma copine.&quot;</p>
               </div>
               <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-amber-400 text-sm">★★★★★</span>
                   <span className="text-white text-sm font-medium">Fatou D.</span>
                 </div>
-                <p className="text-gray-300 text-sm leading-relaxed">&quot;{displayPrice} pour un rapport aussi complet c&apos;est donné. Ma voyante me prend 50€ pour me dire la même chose en moins détaillé. Je recommande à 100%.&quot;</p>
+                <p className="text-gray-300 text-sm leading-relaxed">&quot;{displayPrice} pour un message aussi personnel c&apos;est donné. On m&apos;a déjà fait payer 50€ pour quelque chose de moins précis. Je recommande à 100%.&quot;</p>
               </div>
             </div>
 
             <button onClick={() => { setStep('form'); setResultat(''); }}
               className="w-full text-gray-500 text-sm mt-4 py-2 hover:text-gray-300 transition-colors text-center">
-              ← Nouvelle consultation
+              ← Nouveau message
             </button>
           </div>
         )}
