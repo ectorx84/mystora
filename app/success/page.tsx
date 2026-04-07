@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useEffect, useState, useRef } from 'react';
+import { Suspense, useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 const LOADING_STEPS = [
@@ -17,6 +17,7 @@ const LOADING_STEPS = [
 function SuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id') || '';
+  const depositId = searchParams.get('deposit_id') || '';
   const [rapport, setRapport] = useState('');
   const [prenom, setPrenom] = useState('');
   const [email, setEmail] = useState('');
@@ -45,6 +46,52 @@ function SuccessContent() {
     return () => clearInterval(iv);
   }, [loading]);
 
+  // ====== POLLING PAWAPAY ======
+  const pollPawaPay = useCallback(() => {
+    if (!depositId) return;
+    setLoading(true);
+    setError('');
+    setLoadingStep(0);
+
+    let attempts = 0;
+    const maxAttempts = 30; // 30 × 5s = 2min30 max
+    
+    const poll = () => {
+      attempts++;
+      fetch(`/api/pawapay-status?deposit_id=${depositId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'completed' && data.rapport) {
+            setRapport(data.rapport);
+            setPrenom(data.prenom || '');
+            setEmail(data.email || '');
+            setPartageId(data.partageId || '');
+            setLoading(false);
+          } else if (data.status === 'failed') {
+            setError('Le paiement a échoué. Veuillez réessayer ou contacter contact@mystora.fr');
+            setLoading(false);
+          } else if (attempts >= maxAttempts) {
+            setError('Votre paiement est en cours de traitement. Vous recevrez votre rapport par email dès confirmation. Si vous ne le recevez pas dans 10 minutes, contactez contact@mystora.fr');
+            setLoading(false);
+          } else {
+            // pending ou processing — on réessaie dans 5s
+            setTimeout(poll, 5000);
+          }
+        })
+        .catch(() => {
+          if (attempts >= maxAttempts) {
+            setError('Impossible de vérifier votre paiement. Contactez contact@mystora.fr');
+            setLoading(false);
+          } else {
+            setTimeout(poll, 5000);
+          }
+        });
+    };
+
+    poll();
+  }, [depositId]);
+
+  // ====== FETCH STRIPE ======
   const fetchRapport = (extraData?: { prenom: string; dateNaissance: string }) => {
     setLoading(true);
     setError('');
@@ -85,14 +132,20 @@ function SuccessContent() {
   };
 
   useEffect(() => {
-    if (!sessionId) {
-      setError('Lien invalide. Veuillez passer par le processus de paiement.');
-      setLoading(false);
+    if (depositId) {
+      // PawaPay — polling pour attendre la confirmation mobile money
+      pollPawaPay();
       return;
     }
-    fetchRapport();
+    if (sessionId) {
+      // Stripe — fetch direct du rapport
+      fetchRapport();
+      return;
+    }
+    setError('Lien invalide. Veuillez passer par le processus de paiement.');
+    setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId]);
+  }, [sessionId, depositId]);
 
   const handleFallbackSubmit = () => {
     if (!fbPrenom || fbJour.length !== 2 || fbMois.length !== 2 || fbAnnee.length !== 4) return;
@@ -142,8 +195,17 @@ function SuccessContent() {
           /* ===== LOADING ENGAGEANT ===== */
           <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-purple-500/10">
             <div className="text-center mb-6">
-              <p className="text-white text-lg font-semibold mb-1">✅ Paiement confirmé</p>
-              <p className="text-[#D4A574] text-base">Votre rapport personnalisé est en cours de création</p>
+              {depositId ? (
+                <>
+                  <p className="text-white text-lg font-semibold mb-1">📱 Confirmez le paiement sur votre téléphone</p>
+                  <p className="text-[#D4A574] text-base">Validez la demande mobile money pour recevoir votre rapport</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-white text-lg font-semibold mb-1">✅ Paiement confirmé</p>
+                  <p className="text-[#D4A574] text-base">Votre rapport personnalisé est en cours de création</p>
+                </>
+              )}
             </div>
 
             {/* Étapes progressives */}
