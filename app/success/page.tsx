@@ -34,6 +34,8 @@ function SuccessContent() {
   const [fbMois, setFbMois] = useState('');
   const [fbAnnee, setFbAnnee] = useState('');
   const [fbLoading, setFbLoading] = useState(false);
+  const [pawapayEmail, setPawapayEmail] = useState('');
+  const [pawapayEmailSaved, setPawapayEmailSaved] = useState(false);
   const moisRef = useRef<HTMLInputElement>(null);
   const anneeRef = useRef<HTMLInputElement>(null);
 
@@ -67,6 +69,15 @@ function SuccessContent() {
             setEmail(data.email || '');
             setPartageId(data.partageId || '');
             setLoading(false);
+            // Si email capturé côté client mais pas dans les metadata → envoyer maintenant
+            if (pawapayEmail && !data.email) {
+              fetch('/api/send-rapport', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: pawapayEmail, prenom: data.prenom, rapport: data.rapport, partageId: data.partageId }),
+              }).catch(() => {});
+              setEmail(pawapayEmail);
+            }
           } else if (data.status === 'failed') {
             setError('Le paiement a échoué. Veuillez réessayer ou contacter contact@mystora.fr');
             setLoading(false);
@@ -241,6 +252,43 @@ function SuccessContent() {
             <p className="text-gray-400 text-xs text-center">
               ⏳ Votre rapport est en cours de rédaction — ne fermez pas cette page
             </p>
+
+            {/* Capture email pour PawaPay — le client a déjà payé, il est motivé */}
+            {depositId && !email && (
+              <div className="mt-6 pt-5 border-t border-purple-500/10">
+                <p className="text-gray-300 text-sm text-center mb-3">📧 Recevez aussi votre rapport par email</p>
+                <div className="flex gap-2 max-w-sm mx-auto">
+                  <input
+                    type="email"
+                    placeholder="votre@email.com"
+                    value={pawapayEmail}
+                    onChange={(e) => setPawapayEmail(e.target.value)}
+                    className="flex-1 bg-[#0F0D2E] text-white placeholder-gray-500 rounded-xl px-4 py-3 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-sm"
+                  />
+                  <button
+                    onClick={() => {
+                      if (pawapayEmail.includes('@')) {
+                        setEmail(pawapayEmail);
+                        setPawapayEmailSaved(true);
+                        // Sauvegarder l'email pour le callback
+                        fetch('/api/track', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ event: 'pawapay_email_captured', data: { deposit_id: depositId, email: pawapayEmail } }),
+                        }).catch(() => {});
+                      }
+                    }}
+                    disabled={pawapayEmailSaved}
+                    className="bg-[#D4A574] hover:bg-[#C4955A] text-[#080613] font-bold px-4 py-3 rounded-xl transition-all text-sm disabled:opacity-60"
+                  >
+                    {pawapayEmailSaved ? '✓' : 'OK'}
+                  </button>
+                </div>
+                {pawapayEmailSaved && (
+                  <p className="text-green-400 text-xs text-center mt-2">✅ Votre rapport sera envoyé à {pawapayEmail}</p>
+                )}
+              </div>
+            )}
           </div>
         ) : needsInfo ? (
           /* ===== FALLBACK FORMULAIRE ===== */
