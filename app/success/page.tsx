@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 function SuccessContent() {
@@ -12,24 +12,43 @@ function SuccessContent() {
   const [error, setError] = useState('');
   const [copie, setCopie] = useState(false);
   const [partageId, setPartageId] = useState('');
+  
+  // Fallback : formulaire si metadata vides
+  const [needsInfo, setNeedsInfo] = useState(false);
+  const [fbPrenom, setFbPrenom] = useState('');
+  const [fbJour, setFbJour] = useState('');
+  const [fbMois, setFbMois] = useState('');
+  const [fbAnnee, setFbAnnee] = useState('');
+  const [fbLoading, setFbLoading] = useState(false);
+  const moisRef = useRef<HTMLInputElement>(null);
+  const anneeRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (!sessionId) {
-      setError('Lien invalide. Veuillez passer par le processus de paiement.');
-      setLoading(false);
-      return;
+  const fetchRapport = (extraData?: { prenom: string; dateNaissance: string }) => {
+    setLoading(true);
+    setError('');
+    setNeedsInfo(false);
+    
+    const body: Record<string, string> = { sessionId };
+    if (extraData) {
+      body.prenom = extraData.prenom;
+      body.dateNaissance = extraData.dateNaissance;
     }
 
     fetch('/api/rapport', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId }),
+      body: JSON.stringify(body),
     })
-      .then((res) => {
-        if (!res.ok) throw new Error('Paiement non vérifié');
-        return res.json();
-      })
-      .then((data) => {
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          if (data.needsInfo) {
+            setNeedsInfo(true);
+            setLoading(false);
+            return;
+          }
+          throw new Error(data.error || 'Paiement non vérifié');
+        }
         setRapport(data.resultat);
         setPrenom(data.prenom || '');
         setEmail(data.email || '');
@@ -40,7 +59,36 @@ function SuccessContent() {
         setError('Impossible de vérifier votre paiement. Si vous avez payé, contactez-nous à contact@mystora.fr');
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    if (!sessionId) {
+      setError('Lien invalide. Veuillez passer par le processus de paiement.');
+      setLoading(false);
+      return;
+    }
+    fetchRapport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionId]);
+
+  const handleFallbackSubmit = () => {
+    if (!fbPrenom || fbJour.length !== 2 || fbMois.length !== 2 || fbAnnee.length !== 4) return;
+    setFbLoading(true);
+    const dateNaissance = `${fbAnnee}-${fbMois}-${fbJour}`;
+    fetchRapport({ prenom: fbPrenom, dateNaissance });
+    setFbLoading(false);
+  };
+
+  const handleJour = (val: string) => {
+    const clean = val.replace(/\D/g, '').slice(0, 2);
+    setFbJour(clean);
+    if (clean.length === 2) moisRef.current?.focus();
+  };
+  const handleMois = (val: string) => {
+    const clean = val.replace(/\D/g, '').slice(0, 2);
+    setFbMois(clean);
+    if (clean.length === 2) anneeRef.current?.focus();
+  };
 
   const partagerWhatsApp = () => {
     const lien = `${window.location.origin}/partage/${partageId}`;
@@ -66,6 +114,42 @@ function SuccessContent() {
         {loading ? (
           <div className="text-center py-12">
             <p className="text-[#D4A574] text-xl animate-pulse">✨ Les astres révèlent votre destinée...</p>
+          </div>
+        ) : needsInfo ? (
+          <div className="py-6">
+            <div className="text-center mb-6">
+              <p className="text-[#D4A574] text-lg font-semibold mb-2">✨ Votre paiement est confirmé</p>
+              <p className="text-gray-300 text-sm">Pour générer votre rapport personnalisé, veuillez confirmer vos informations :</p>
+            </div>
+            <div className="flex flex-col gap-4 max-w-sm mx-auto">
+              <input
+                type="text"
+                placeholder="Votre prénom"
+                value={fbPrenom}
+                onChange={(e) => setFbPrenom(e.target.value)}
+                className="bg-[#1E1B4B] text-white placeholder-gray-400 rounded-xl px-4 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-lg"
+                autoFocus
+              />
+              <div className="flex flex-col gap-1">
+                <label className="text-gray-400 text-sm px-1">Date de naissance</label>
+                <div className="flex gap-2">
+                  <input type="tel" inputMode="numeric" placeholder="JJ" value={fbJour}
+                    onChange={(e) => handleJour(e.target.value)}
+                    className="bg-[#1E1B4B] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-1/4 text-center text-lg font-semibold transition-colors" />
+                  <input ref={moisRef} type="tel" inputMode="numeric" placeholder="MM" value={fbMois}
+                    onChange={(e) => handleMois(e.target.value)}
+                    className="bg-[#1E1B4B] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-1/4 text-center text-lg font-semibold transition-colors" />
+                  <input ref={anneeRef} type="tel" inputMode="numeric" placeholder="AAAA" value={fbAnnee}
+                    onChange={(e) => setFbAnnee(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                    className="bg-[#1E1B4B] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-2/4 text-center text-lg font-semibold transition-colors" />
+                </div>
+              </div>
+              <button onClick={handleFallbackSubmit}
+                disabled={!fbPrenom || fbJour.length !== 2 || fbMois.length !== 2 || fbAnnee.length !== 4 || fbLoading}
+                className="bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 text-white font-bold py-4 rounded-xl transition-all disabled:opacity-60 text-lg">
+                {fbLoading ? '⏳ Génération...' : '✨ Générer mon rapport'}
+              </button>
+            </div>
           </div>
         ) : error ? (
           <div className="text-center py-12">

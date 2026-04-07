@@ -16,6 +16,14 @@ const AFRICA_COUNTRIES = [
 export async function POST(request: NextRequest) {
   const { prenom, dateNaissance, email, question } = await request.json();
 
+  // ✅ VALIDATION — empêcher les sessions Stripe sans metadata
+  if (!prenom || !dateNaissance) {
+    return NextResponse.json(
+      { error: 'Prénom et date de naissance requis' },
+      { status: 400 }
+    );
+  }
+
   // Détection pays via header Vercel (gratuit, automatique)
   const country = request.headers.get('x-vercel-ip-country') || '';
   const isAfrica = AFRICA_COUNTRIES.includes(country);

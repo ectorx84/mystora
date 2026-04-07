@@ -102,7 +102,8 @@ function getCompatibleSigns(signName: string): string[] {
 // ============ API ROUTE ============
 
 export async function POST(request: NextRequest) {
-  const { sessionId } = await request.json();
+  const body = await request.json();
+  const { sessionId, prenom: fallbackPrenom, dateNaissance: fallbackDate } = body;
   
   if (!sessionId) {
     return NextResponse.json({ error: 'Session manquante' }, { status: 400 });
@@ -122,13 +123,14 @@ export async function POST(request: NextRequest) {
   }
 
   // Récupérer les données depuis les metadata Stripe (source de vérité)
-  const prenom = session.metadata?.prenom || '';
-  const dateNaissance = session.metadata?.dateNaissance || '';
+  // Fallback : si metadata vides, accepter prenom/dateNaissance envoyés par le client
+  const prenom = session.metadata?.prenom || fallbackPrenom || '';
+  const dateNaissance = session.metadata?.dateNaissance || fallbackDate || '';
   const email = session.metadata?.email || '';
   const question = session.metadata?.question || '';
 
   if (!prenom || !dateNaissance) {
-    return NextResponse.json({ error: 'Données incomplètes' }, { status: 400 });
+    return NextResponse.json({ error: 'Données incomplètes', needsInfo: true }, { status: 400 });
   }
 
   const parts = dateNaissance.split('-');
