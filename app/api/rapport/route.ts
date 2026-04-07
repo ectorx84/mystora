@@ -227,7 +227,7 @@ Environ 800-1000 mots. Chaque section doit citer les vrais chiffres.`
     fetch(`${process.env.NEXT_PUBLIC_URL}/api/send-rapport`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, prenom, rapport: texte }),
+      body: JSON.stringify({ email, prenom, rapport: texte, partageId: id }),
     }).catch(() => {});
   }
 
