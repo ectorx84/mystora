@@ -244,6 +244,20 @@ Environ 800-1000 mots. Chaque section doit citer les vrais chiffres.`
     sessionId,
   })}`);
 
+  // Marquer le contact comme acheteur dans Brevo (stoppe les relances)
+  if (email) {
+    fetch('https://api.brevo.com/v3/contacts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY! },
+      body: JSON.stringify({
+        email,
+        attributes: { PRENOM: prenom, ACHETE: true },
+        listIds: [2],
+        updateEnabled: true,
+      }),
+    }).catch(() => {});
+  }
+
   // Notification admin — nouvelle vente Stripe
   fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
