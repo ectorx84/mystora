@@ -26,6 +26,9 @@ const PAWAPAY_COUNTRIES: Record<string, { alpha3: string; currency: string; amou
   'RW': { alpha3: 'RWA', currency: 'RWF', amount: '2700' },   // Rwanda — ~1,99€
   'SN': { alpha3: 'SEN', currency: 'XOF', amount: '1306' },   // Sénégal
   'MG': { alpha3: 'MDG', currency: 'MGA', amount: '9500' },   // Madagascar — ~1,99€
+  'SL': { alpha3: 'SLE', currency: 'SLE', amount: '45' },     // Sierra Leone — ~1,99€
+  'UG': { alpha3: 'UGA', currency: 'UGX', amount: '7800' },   // Ouganda — ~1,99€
+  'ZM': { alpha3: 'ZMB', currency: 'ZMW', amount: '55' },     // Zambie — ~1,99€
 };
 
 export async function POST(request: NextRequest) {

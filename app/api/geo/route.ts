@@ -10,7 +10,7 @@ const AFRICA_COUNTRIES = [
 ];
 
 // Pays avec PawaPay mobile money activé
-const PAWAPAY_COUNTRIES = ['BJ','CM','CI','CD','GA','KE','CG','RW','SN','MG'];
+const PAWAPAY_COUNTRIES = ['BJ','CM','CI','CD','GA','KE','CG','RW','SN','MG','SL','UG','ZM'];
 
 export async function GET(request: NextRequest) {
   const country = request.headers.get('x-vercel-ip-country') || '';
