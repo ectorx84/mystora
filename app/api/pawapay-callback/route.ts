@@ -255,6 +255,18 @@ export async function POST(request: NextRequest) {
       }).catch(() => {});
     }
 
+    // Notification admin — nouvelle vente PawaPay
+    fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY! },
+      body: JSON.stringify({
+        sender: { name: 'Mystora', email: 'contact@mystora.fr' },
+        to: [{ email: 'contact@mystora.fr' }],
+        subject: `💰 Vente PawaPay — ${prenom} (${country})`,
+        htmlContent: `<div style="font-family:Arial;padding:20px;"><h2>💰 Nouvelle vente Mobile Money</h2><p><strong>Client :</strong> ${prenom}</p><p><strong>Pays :</strong> ${country}</p><p><strong>Montant :</strong> ${callback.depositedAmount || callback.requestedAmount} ${callback.currency}</p><p><strong>Provider :</strong> PawaPay</p><p><strong>Deposit ID :</strong> ${callback.depositId}</p><p><strong>Heure :</strong> ${new Date().toLocaleString('fr-FR', { timeZone: 'America/Guadeloupe' })}</p></div>`,
+      }),
+    }).catch(() => {});
+
     console.log(`[MYSTORA_EVENT] ${JSON.stringify({
       timestamp: new Date().toISOString(),
       event: 'pawapay_checkout_complete',

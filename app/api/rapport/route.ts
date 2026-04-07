@@ -233,14 +233,28 @@ Environ 800-1000 mots. Chaque section doit citer les vrais chiffres.`
 
   // Tracking serveur — vente confirmée
   const priceType = session.metadata?.priceType || 'standard';
+  const saleCountry = session.metadata?.country || 'unknown';
+  const saleAmount = priceType === 'africa' ? '1,99€' : '4,99€';
   console.log(`[MYSTORA_EVENT] ${JSON.stringify({
     timestamp: new Date().toISOString(),
     event: 'checkout_complete',
     prenom,
-    country: session.metadata?.country || 'unknown',
+    country: saleCountry,
     priceType,
     sessionId,
   })}`);
+
+  // Notification admin — nouvelle vente Stripe
+  fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY! },
+    body: JSON.stringify({
+      sender: { name: 'Mystora', email: 'contact@mystora.fr' },
+      to: [{ email: 'contact@mystora.fr' }],
+      subject: `💰 Vente Stripe — ${prenom} (${saleCountry})`,
+      htmlContent: `<div style="font-family:Arial;padding:20px;"><h2>💰 Nouvelle vente Stripe</h2><p><strong>Client :</strong> ${prenom}</p><p><strong>Email :</strong> ${email || 'non fourni'}</p><p><strong>Pays :</strong> ${saleCountry}</p><p><strong>Montant :</strong> ${saleAmount}</p><p><strong>Provider :</strong> Stripe</p><p><strong>Session ID :</strong> ${sessionId}</p><p><strong>Heure :</strong> ${new Date().toLocaleString('fr-FR', { timeZone: 'America/Guadeloupe' })}</p></div>`,
+    }),
+  }).catch(() => {});
 
   return NextResponse.json({ resultat: texte, prenom, email, partageId: id, partageUrl: blob.url });
 }
