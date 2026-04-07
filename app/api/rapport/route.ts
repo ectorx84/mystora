@@ -126,7 +126,8 @@ export async function POST(request: NextRequest) {
   // Fallback : si metadata vides, accepter prenom/dateNaissance envoyés par le client
   const prenom = session.metadata?.prenom || fallbackPrenom || '';
   const dateNaissance = session.metadata?.dateNaissance || fallbackDate || '';
-  const email = session.metadata?.email || '';
+  // Email : metadata > email Stripe checkout > vide
+  const email = session.metadata?.email || session.customer_details?.email || '';
   const question = session.metadata?.question || '';
 
   if (!prenom || !dateNaissance) {
