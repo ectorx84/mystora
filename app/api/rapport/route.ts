@@ -265,8 +265,8 @@ Environ 800-1000 mots. Chaque section doit citer les vrais chiffres.`
     body: JSON.stringify({
       sender: { name: 'Mystora', email: 'contact@mystora.fr' },
       to: [{ email: 'contact@mystora.fr' }],
-      subject: `💰 Vente Stripe — ${prenom} (${saleCountry})`,
-      htmlContent: `<div style="font-family:Arial;padding:20px;"><h2>💰 Nouvelle vente Stripe</h2><p><strong>Client :</strong> ${prenom}</p><p><strong>Email :</strong> ${email || 'non fourni'}</p><p><strong>Pays :</strong> ${saleCountry}</p><p><strong>Montant :</strong> ${saleAmount}</p><p><strong>Provider :</strong> Stripe</p><p><strong>Session ID :</strong> ${sessionId}</p><p><strong>Heure :</strong> ${new Date().toLocaleString('fr-FR', { timeZone: 'America/Guadeloupe' })}</p></div>`,
+      subject: `💰 Mystora FR — Vente ${saleAmount} — ${prenom} (${saleCountry})`,
+      htmlContent: `<div style="font-family:Arial;padding:20px;"><h2>💰 Nouvelle vente — Mystora FR</h2><p><strong>Client :</strong> ${prenom}</p><p><strong>Email :</strong> ${email || 'non fourni'}</p><p><strong>Pays :</strong> ${saleCountry}</p><p><strong>Montant :</strong> ${saleAmount}</p><p><strong>Provider :</strong> Stripe</p><p><strong>Session ID :</strong> ${sessionId}</p><p><strong>Heure :</strong> ${new Date().toLocaleString('fr-FR', { timeZone: 'America/Guadeloupe' })}</p></div>`,
     }),
   }).catch(() => {});
 
