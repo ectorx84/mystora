@@ -2,6 +2,14 @@
 import { Suspense, useEffect, useState, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 
+const LOADING_STEPS = [
+  { icon: '🔮', text: 'Connexion à votre profil astral...' },
+  { icon: '✨', text: 'Analyse de votre chemin de vie...' },
+  { icon: '🌙', text: 'Calcul de vos cycles personnels...' },
+  { icon: '⭐', text: 'Rédaction de votre guidance...' },
+  { icon: '📜', text: 'Finalisation de votre rapport...' },
+];
+
 function SuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id') || '';
@@ -12,6 +20,7 @@ function SuccessContent() {
   const [error, setError] = useState('');
   const [copie, setCopie] = useState(false);
   const [partageId, setPartageId] = useState('');
+  const [loadingStep, setLoadingStep] = useState(0);
   
   // Fallback : formulaire si metadata vides
   const [needsInfo, setNeedsInfo] = useState(false);
@@ -23,10 +32,20 @@ function SuccessContent() {
   const moisRef = useRef<HTMLInputElement>(null);
   const anneeRef = useRef<HTMLInputElement>(null);
 
+  // Animation des étapes de chargement
+  useEffect(() => {
+    if (!loading) return;
+    const iv = setInterval(() => {
+      setLoadingStep(prev => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
+    }, 2500);
+    return () => clearInterval(iv);
+  }, [loading]);
+
   const fetchRapport = (extraData?: { prenom: string; dateNaissance: string }) => {
     setLoading(true);
     setError('');
     setNeedsInfo(false);
+    setLoadingStep(0);
     
     const body: Record<string, string> = { sessionId };
     if (extraData) {
@@ -104,21 +123,64 @@ function SuccessContent() {
   };
 
   return (
-    <main className="min-h-screen bg-[#1E1B4B] flex flex-col items-center px-4 py-12">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">🔮 Mystora</h1>
-        {prenom && <p className="text-[#D4A574] text-lg">Votre rapport complet, {prenom}</p>}
-      </div>
+    <main className="min-h-screen bg-[#080613] relative overflow-hidden flex flex-col items-center px-4 py-8">
+      {/* Fond cosmique minimal */}
+      <div className="fixed inset-0 bg-gradient-to-b from-purple-900/20 via-[#080613] to-[#080613] pointer-events-none" />
 
-      <div className="bg-[#2D2A6E] rounded-2xl p-8 w-full max-w-2xl shadow-xl">
+      <div className="relative z-10 w-full max-w-2xl">
+        <div className="text-center mb-6">
+          <div className="text-4xl mb-2">✦</div>
+          <h1 className="text-3xl font-bold text-white">Mystora</h1>
+          {prenom && <p className="text-[#D4A574] text-lg mt-1">Votre message complet, {prenom}</p>}
+        </div>
+
         {loading ? (
-          <div className="text-center py-12">
-            <p className="text-[#D4A574] text-xl animate-pulse">✨ Les astres révèlent votre destinée...</p>
+          /* ===== LOADING ENGAGEANT ===== */
+          <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-purple-500/10">
+            <div className="text-center mb-6">
+              <p className="text-white text-lg font-semibold mb-1">✅ Paiement confirmé</p>
+              <p className="text-[#D4A574] text-base">Votre rapport personnalisé est en cours de création</p>
+            </div>
+
+            {/* Étapes progressives */}
+            <div className="flex flex-col gap-3 mb-6">
+              {LOADING_STEPS.map((step, i) => (
+                <div key={i} className={`flex items-center gap-3 transition-all duration-500 ${
+                  i <= loadingStep ? 'opacity-100' : 'opacity-20'
+                }`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-base shrink-0 transition-all duration-500 ${
+                    i < loadingStep
+                      ? 'bg-green-600/30 border border-green-500/50'
+                      : i === loadingStep
+                        ? 'bg-purple-600/30 border border-purple-400/50 animate-pulse'
+                        : 'bg-gray-800/30 border border-gray-700/30'
+                  }`}>
+                    {i < loadingStep ? '✓' : step.icon}
+                  </div>
+                  <span className={`text-sm ${
+                    i <= loadingStep ? 'text-gray-200' : 'text-gray-600'
+                  }`}>{step.text}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Barre de progression */}
+            <div className="w-full bg-gray-800/50 rounded-full h-2 mb-4">
+              <div
+                className="h-2 rounded-full bg-gradient-to-r from-purple-600 to-[#D4A574] transition-all duration-1000 ease-out"
+                style={{ width: `${Math.min(((loadingStep + 1) / LOADING_STEPS.length) * 100, 95)}%` }}
+              />
+            </div>
+
+            <p className="text-gray-400 text-xs text-center">
+              ⏳ Environ 10 secondes — ne fermez pas cette page
+            </p>
           </div>
         ) : needsInfo ? (
-          <div className="py-6">
+          /* ===== FALLBACK FORMULAIRE ===== */
+          <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-purple-500/10">
             <div className="text-center mb-6">
-              <p className="text-[#D4A574] text-lg font-semibold mb-2">✨ Votre paiement est confirmé</p>
+              <p className="text-[#D4A574] text-lg font-semibold mb-2">✅ Paiement confirmé</p>
               <p className="text-gray-300 text-sm">Pour générer votre rapport personnalisé, veuillez confirmer vos informations :</p>
             </div>
             <div className="flex flex-col gap-4 max-w-sm mx-auto">
@@ -127,7 +189,7 @@ function SuccessContent() {
                 placeholder="Votre prénom"
                 value={fbPrenom}
                 onChange={(e) => setFbPrenom(e.target.value)}
-                className="bg-[#1E1B4B] text-white placeholder-gray-400 rounded-xl px-4 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-lg"
+                className="bg-[#0F0D2E] text-white placeholder-gray-400 rounded-xl px-4 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-lg"
                 autoFocus
               />
               <div className="flex flex-col gap-1">
@@ -135,13 +197,13 @@ function SuccessContent() {
                 <div className="flex gap-2">
                   <input type="tel" inputMode="numeric" placeholder="JJ" value={fbJour}
                     onChange={(e) => handleJour(e.target.value)}
-                    className="bg-[#1E1B4B] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-1/4 text-center text-lg font-semibold transition-colors" />
+                    className="bg-[#0F0D2E] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-1/4 text-center text-lg font-semibold transition-colors" />
                   <input ref={moisRef} type="tel" inputMode="numeric" placeholder="MM" value={fbMois}
                     onChange={(e) => handleMois(e.target.value)}
-                    className="bg-[#1E1B4B] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-1/4 text-center text-lg font-semibold transition-colors" />
+                    className="bg-[#0F0D2E] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-1/4 text-center text-lg font-semibold transition-colors" />
                   <input ref={anneeRef} type="tel" inputMode="numeric" placeholder="AAAA" value={fbAnnee}
                     onChange={(e) => setFbAnnee(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                    className="bg-[#1E1B4B] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-2/4 text-center text-lg font-semibold transition-colors" />
+                    className="bg-[#0F0D2E] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-2/4 text-center text-lg font-semibold transition-colors" />
                 </div>
               </div>
               <button onClick={handleFallbackSubmit}
@@ -152,38 +214,49 @@ function SuccessContent() {
             </div>
           </div>
         ) : error ? (
-          <div className="text-center py-12">
+          <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-purple-500/10 text-center">
             <p className="text-red-400 text-lg mb-4">⚠️ {error}</p>
             <a href="/" className="text-[#D4A574] underline">Retour à l&apos;accueil</a>
           </div>
         ) : (
           <>
-            <div className="text-white leading-relaxed whitespace-pre-wrap">{rapport}</div>
+            {/* ===== RAPPORT ===== */}
+            <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border border-purple-500/10 mb-4">
+              <div className="text-white leading-relaxed whitespace-pre-wrap text-[15px]">{rapport}</div>
+            </div>
+
             {email && (
-              <div className="mt-6 p-4 bg-[#1E1B4B] rounded-xl border border-[#6B21A8] text-center">
+              <div className="bg-[#1A1747]/60 rounded-2xl p-3 border border-purple-500/10 text-center mb-4">
                 <p className="text-[#D4A574] text-sm">📧 Votre rapport a été envoyé à {email}</p>
               </div>
             )}
-            <div className="mt-6 p-4 bg-[#1E1B4B] rounded-xl border border-[#D4A574] text-center">
+
+            {/* Partage */}
+            <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-[#D4A574]/30 text-center mb-4">
               <p className="text-[#D4A574] font-semibold mb-3">✨ Partagez votre profil avec vos proches</p>
               <div className="flex gap-3">
                 <button
                   onClick={partagerWhatsApp}
-                  className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-all">
-                  💬 Partager sur WhatsApp
+                  className="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition-all text-sm">
+                  💬 WhatsApp
                 </button>
                 <button
                   onClick={copierLien}
-                  className="flex-1 bg-[#6B21A8] hover:bg-[#7C3AED] text-white font-bold py-3 rounded-xl transition-all">
+                  className="flex-1 bg-purple-700 hover:bg-purple-600 text-white font-bold py-3 rounded-xl transition-all text-sm">
                   {copie ? '✅ Copié !' : '🔗 Copier le lien'}
                 </button>
               </div>
             </div>
+
+            {/* Retour */}
+            <a href="/" className="block text-center text-gray-500 text-sm py-2 hover:text-gray-300 transition-colors">
+              ← Nouveau message
+            </a>
           </>
         )}
-      </div>
 
-      <p className="text-gray-500 text-sm mt-6">Divertissement · <a href="/mentions-legales" className="underline hover:text-gray-400">Mentions légales</a></p>
+        <p className="text-gray-600 text-xs mt-6 text-center">Contenu de divertissement — mystora.fr · <a href="/mentions-legales" className="underline hover:text-gray-400">Mentions légales</a></p>
+      </div>
     </main>
   );
 }
@@ -191,7 +264,7 @@ function SuccessContent() {
 export default function Success() {
   return (
     <Suspense fallback={
-      <main className="min-h-screen bg-[#1E1B4B] flex items-center justify-center">
+      <main className="min-h-screen bg-[#080613] flex items-center justify-center">
         <p className="text-[#D4A574] text-xl animate-pulse">✨ Chargement...</p>
       </main>
     }>
