@@ -4,10 +4,14 @@ import { useSearchParams } from 'next/navigation';
 
 const LOADING_STEPS = [
   { icon: '🔮', text: 'Connexion à votre profil astral...' },
-  { icon: '✨', text: 'Analyse de votre chemin de vie...' },
-  { icon: '🌙', text: 'Calcul de vos cycles personnels...' },
-  { icon: '⭐', text: 'Rédaction de votre guidance...' },
-  { icon: '📜', text: 'Finalisation de votre rapport...' },
+  { icon: '✨', text: 'Analyse de votre signe et décan...' },
+  { icon: '🌙', text: 'Calcul de votre chemin de vie...' },
+  { icon: '🔢', text: 'Étude de vos nombres personnels...' },
+  { icon: '💫', text: 'Lecture de vos cycles planétaires...' },
+  { icon: '❤️', text: 'Analyse de vos compatibilités...' },
+  { icon: '⭐', text: 'Rédaction de votre guidance personnelle...' },
+  { icon: '🌟', text: 'Vérification des alignements...' },
+  { icon: '📜', text: 'Finalisation de votre rapport complet...' },
 ];
 
 function SuccessContent() {
@@ -37,7 +41,7 @@ function SuccessContent() {
     if (!loading) return;
     const iv = setInterval(() => {
       setLoadingStep(prev => (prev < LOADING_STEPS.length - 1 ? prev + 1 : prev));
-    }, 2500);
+    }, 5000);
     return () => clearInterval(iv);
   }, [loading]);
 
@@ -173,7 +177,7 @@ function SuccessContent() {
             </div>
 
             <p className="text-gray-400 text-xs text-center">
-              ⏳ Environ 10 secondes — ne fermez pas cette page
+              ⏳ Votre rapport est en cours de rédaction — ne fermez pas cette page
             </p>
           </div>
         ) : needsInfo ? (
