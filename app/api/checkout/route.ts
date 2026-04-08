@@ -107,7 +107,8 @@ export async function POST(request: NextRequest) {
     : process.env.STRIPE_PRICE_ID!;
 
   const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
+    // Pas de payment_method_types → Stripe active automatiquement
+    // Apple Pay, Google Pay, Link (one-click) + carte
     line_items: [
       {
         price: priceId,
