@@ -3,8 +3,20 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { track } from '@vercel/analytics';
 
 // ===== TRACKING =====
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
+
 function trackEvent(event: string, data?: Record<string, string | number | boolean>) {
-  // Vercel Analytics — visible dans le dashboard Analytics > Events
+  // GA4 — visible dans Google Analytics > Temps réel + Événements
+  try {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', event, data || {});
+    }
+  } catch {}
+  // Vercel Analytics (Pro plan only)
   try {
     track(event, data || {});
   } catch {}

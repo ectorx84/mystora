@@ -2,6 +2,12 @@
 import { Suspense, useEffect, useState, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+  }
+}
+
 const LOADING_STEPS = [
   { icon: '🔮', text: 'Connexion à votre profil astral...' },
   { icon: '✨', text: 'Analyse de votre signe et décan...' },
@@ -69,6 +75,10 @@ function SuccessContent() {
             setEmail(data.email || '');
             setPartageId(data.partageId || '');
             setLoading(false);
+            // GA4 purchase conversion
+            try {
+              if (window.gtag) window.gtag('event', 'purchase', { transaction_id: depositId, method: 'pawapay' });
+            } catch {}
             // Si email capturé côté client mais pas dans les metadata → envoyer maintenant
             if (pawapayEmail && !data.email) {
               fetch('/api/send-rapport', {
@@ -135,6 +145,10 @@ function SuccessContent() {
         setEmail(data.email || '');
         setPartageId(data.partageId);
         setLoading(false);
+        // GA4 purchase conversion
+        try {
+          if (window.gtag) window.gtag('event', 'purchase', { transaction_id: sessionId || depositId, method: depositId ? 'pawapay' : 'stripe' });
+        } catch {}
       })
       .catch(() => {
         setError('Impossible de vérifier votre paiement. Si vous avez payé, contactez-nous à contact@mystora.fr');
