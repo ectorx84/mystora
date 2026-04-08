@@ -163,7 +163,7 @@ RÈGLES ABSOLUES :
 - Phrase 2 (TENSION) : Révèle ce qui se passe EN CE MOMENT dans sa vie — un tiraillement, une décision repoussée, quelque chose qui pèse. Sois concret.
 - Phrase 3 (LIEN) : ${intentionInstruction || 'Touche un point sensible — amour, solitude, ambition frustrée, peur de l\'échec. Quelque chose d\'émotionnel et universel.'} Fais référence à quelque chose de spécifique.
 - Phrase 4 (SIGNAL) : Annonce quelque chose de concret qui va arriver — une rencontre, un signe, un changement. Crée de l'anticipation.
-- Phrase 5 (COUPURE) : Commence à révéler un secret sur ${prenom} — puis COUPE NET au milieu. La phrase DOIT être INCOMPLÈTE. Le lecteur DOIT vouloir la suite.
+- Phrase 5 (COUPURE) : Commence à révéler quelque chose de TRÈS SPÉCIFIQUE — une date précise (un mois de 2026), un chiffre, un détail concret sur l'amour ou l'argent de ${prenom} — puis COUPE NET au milieu du mot ou de la phrase. La phrase DOIT être INCOMPLÈTE et donner l'impression que l'information la plus importante est JUSTE après la coupure. Exemple de structure : "${prenom}, ce que votre message révèle sur le mois de [mois], c'est que quelqu'un de très proche va—"
 - Vouvoie TOUJOURS. Utilise le prénom.
 - Ton : intime, bienveillant mais direct. Comme un message personnel qu'on reçoit et qui donne des frissons.
 - Texte brut, pas de markdown, pas de titres, pas de gras, pas de numéros.

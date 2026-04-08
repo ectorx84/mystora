@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { track } from '@vercel/analytics';
 
 // ===== TRACKING =====
@@ -195,14 +195,7 @@ export default function Home() {
     }
   };
 
-  const REPORT_SECTIONS = [
-    { icon: '✦', label: 'Qui vous êtes vraiment', detail: 'votre nature profonde révélée' },
-    { icon: '❤️', label: 'Amour & relations', detail: 'ce que vous n\'osez pas voir' },
-    { icon: '💼', label: 'Carrière & argent', detail: 'le blocage caché à lever' },
-    { icon: '🔮', label: 'Vos forces secrètes', detail: 'ce que votre prénom révèle' },
-    { icon: '📅', label: 'Ce qui vous attend', detail: 'les mois clés à surveiller' },
-    { icon: '🔑', label: 'Votre guidance', detail: 'le conseil que vous attendiez' },
-  ];
+  
 
   return (
     <main className="min-h-screen bg-[#080613] relative overflow-hidden">
@@ -415,35 +408,30 @@ export default function Home() {
               </div>
               <div className="text-gray-200 text-[15px] leading-relaxed whitespace-pre-line">{resultat}</div>
 
+              {/* Révélation partielle visible — hook de curiosité */}
+              <div className="mt-4 pt-4 border-t border-purple-500/20">
+                <p className="text-amber-200 text-[15px] leading-relaxed">
+                  ✦ {prenom}, votre message complet révèle {intention === 'amour' ? 'une vérité sur votre vie sentimentale que vous ressentez sans oser la formuler' : intention === 'carriere' ? 'ce qui bloque réellement votre évolution professionnelle depuis des mois' : intention === 'argent' ? 'la raison profonde pour laquelle l\'argent vous échappe en ce moment' : intention === 'blocage' ? 'l\'origine exacte du blocage qui vous empêche d\'avancer' : 'un tournant que vous n\'avez pas encore vu venir'}.{' '}
+                  <span className="text-amber-200/60">Il contient aussi une date précise à surveiller et...</span>
+                </p>
+              </div>
+
               {/* Blurred content — personnalisé */}
-              <div className="relative mt-4">
+              <div className="relative mt-3">
                 <div className="text-gray-300 text-[15px] leading-relaxed blur-[6px] select-none pointer-events-none" aria-hidden="true">
-                  <p className="mb-2">{prenom}, votre profil astral révèle une période de transformation profonde qui va impacter vos relations et votre carrière de manière inattendue. {signeInfo ? `En tant que ${signeInfo}, l` : 'L'}es alignements planétaires indiquent un tournant majeur dans les semaines à venir.</p>
-                  <p className="mb-2">Côté amour, une rencontre ou une prise de conscience va bouleverser votre vision des choses. Votre chemin de vie indique un potentiel inexploité en matière financière.</p>
-                  <p>Votre numérologie personnelle confirme ce cycle de renouveau et révèle les dates clés à surveiller absolument...</p>
+                  <p className="mb-2">{prenom}, {signeInfo ? `en tant que ${signeInfo}, ` : ''}votre profil révèle que la période actuelle est un tournant décisif. Ce que vous ressentez en ce moment — cette tension entre ce que vous voulez et ce que vous vivez — a une explication précise dans votre thème.</p>
+                  <p className="mb-2">{intention === 'amour' ? 'Votre vie amoureuse est sur le point de basculer. La personne à laquelle vous pensez' : intention === 'carriere' ? 'Professionnellement, un changement majeur se prépare. L\'opportunité que vous attendez' : intention === 'argent' ? 'Financièrement, un déblocage est imminent. Le schéma qui vous retient' : intention === 'blocage' ? 'Le blocage que vous ressentez a une origine que vous n\'avez jamais envisagée' : 'Une rencontre ou un événement va tout changer dans les prochaines semaines'}. Les dates clés à surveiller sont le...</p>
+                  <p>Votre guidance personnelle indique trois actions concrètes à poser dès maintenant pour...</p>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#1A1747]/50 to-[#1A1747] flex items-end justify-center pb-2">
-                  <p className="text-amber-200/80 text-sm font-medium">⬇️ La suite de votre message vous attend</p>
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#1A1747]/50 to-[#1A1747]" />
               </div>
             </div>
 
-            {/* CTA Card — priorité #1 */}
+            {/* CTA Card — simplifié, direct */}
             <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20 mb-4">
-              <h3 className="text-white text-center font-semibold text-lg mb-3">La suite de votre message contient :</h3>
-              
-              {/* Sections visuelles du rapport */}
-              <div className="grid grid-cols-2 gap-2 mb-4">
-                {REPORT_SECTIONS.map((s, i) => (
-                  <div key={i} className="bg-[#0F0D2E]/60 rounded-xl px-3 py-2.5 border border-purple-700/20">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-base">{s.icon}</span>
-                      <span className="text-white text-sm font-medium">{s.label}</span>
-                    </div>
-                    <p className="text-gray-400 text-xs mt-0.5 pl-6">{s.detail}</p>
-                  </div>
-                ))}
-              </div>
+              <p className="text-gray-300 text-center text-[15px] mb-4">
+                Votre message fait <span className="text-white font-semibold">8 sections</span> et contient vos <span className="text-white font-semibold">dates clés</span>, vos <span className="text-white font-semibold">blocages cachés</span> et votre <span className="text-white font-semibold">guidance personnelle</span>.
+              </p>
 
               <div className="text-center mb-3">
                 <span className="text-gray-400 line-through text-sm">{anchorPrice}</span>
