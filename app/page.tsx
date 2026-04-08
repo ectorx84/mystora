@@ -61,7 +61,7 @@ export default function Home() {
     }).catch(() => {});
     const params = new URLSearchParams(window.location.search);
     const prenomParam = params.get('prenom');
-    if (prenomParam) setPrenom(prenomParam);
+    if (prenomParam) setPrenom(prenomParam.charAt(0).toUpperCase() + prenomParam.slice(1));
     // Track landing
     trackEvent('landing_view', { source: prenomParam ? 'manychat_or_brevo' : 'direct' });
   }, []);
@@ -286,7 +286,7 @@ export default function Home() {
                   type="text"
                   placeholder="Votre prénom"
                   value={prenom}
-                  onChange={(e) => setPrenom(e.target.value)}
+                  onChange={(e) => { const v = e.target.value; setPrenom(v.charAt(0).toUpperCase() + v.slice(1)); }}
                   className="bg-[#0F0D2E] text-white placeholder-gray-400 rounded-xl px-4 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-lg"
                   autoComplete="given-name"
                   autoFocus
