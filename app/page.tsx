@@ -114,12 +114,7 @@ export default function Home() {
   const handleJour = (val: string) => {
     const clean = val.replace(/\D/g, '').slice(0, 2);
     setJour(clean);
-    // Auto-focus mois si 2 chiffres OU si premier chiffre >= 4 (forcément 0X devant)
-    if (clean.length === 2 || (clean.length === 1 && parseInt(clean) >= 4)) {
-      const padded = clean.padStart(2, '0');
-      setJour(padded);
-      moisRef.current?.focus();
-    }
+    if (clean.length === 2) moisRef.current?.focus();
   };
   const handleJourBlur = () => {
     if (jour.length === 1 && jour !== '0') setJour(jour.padStart(2, '0'));
@@ -127,12 +122,7 @@ export default function Home() {
   const handleMois = (val: string) => {
     const clean = val.replace(/\D/g, '').slice(0, 2);
     setMois(clean);
-    // Auto-focus année si 2 chiffres OU si premier chiffre >= 2 (mois max 12)
-    if (clean.length === 2 || (clean.length === 1 && parseInt(clean) >= 2)) {
-      const padded = clean.padStart(2, '0');
-      setMois(padded);
-      anneeRef.current?.focus();
-    }
+    if (clean.length === 2) anneeRef.current?.focus();
   };
   const handleMoisBlur = () => {
     if (mois.length === 1 && mois !== '0') setMois(mois.padStart(2, '0'));
