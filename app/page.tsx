@@ -116,10 +116,16 @@ export default function Home() {
     setJour(clean);
     if (clean.length === 2) moisRef.current?.focus();
   };
+  const handleJourBlur = () => {
+    if (jour.length === 1) setJour(jour.padStart(2, '0'));
+  };
   const handleMois = (val: string) => {
     const clean = val.replace(/\D/g, '').slice(0, 2);
     setMois(clean);
     if (clean.length === 2) anneeRef.current?.focus();
+  };
+  const handleMoisBlur = () => {
+    if (mois.length === 1) setMois(mois.padStart(2, '0'));
   };
   const handleAnnee = (val: string) => {
     setAnnee(val.replace(/\D/g, '').slice(0, 4));
@@ -296,9 +302,11 @@ export default function Home() {
                   <div className="flex gap-2">
                     <input type="tel" inputMode="numeric" placeholder="JJ" value={jour}
                       onChange={(e) => handleJour(e.target.value)}
+                      onBlur={handleJourBlur}
                       className="bg-[#0F0D2E] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-1/4 text-center text-lg font-semibold transition-colors" />
                     <input ref={moisRef} type="tel" inputMode="numeric" placeholder="MM" value={mois}
                       onChange={(e) => handleMois(e.target.value)}
+                      onBlur={handleMoisBlur}
                       className="bg-[#0F0D2E] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-1/4 text-center text-lg font-semibold transition-colors" />
                     <input ref={anneeRef} type="tel" inputMode="numeric" placeholder="AAAA" value={annee}
                       onChange={(e) => handleAnnee(e.target.value)}
