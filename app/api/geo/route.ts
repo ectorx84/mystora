@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
   const hasMobileMoney = PAWAPAY_COUNTRIES.includes(country);
   return NextResponse.json({
     country,
-    price: isAfrica ? '1,99€' : '4,90€',
+    price: '1,99€',  // TEST 48-72h : 1,99€ pour tout le monde
     isAfrica,
     paymentMethod: hasMobileMoney ? 'mobile_money' : 'card',
   });
