@@ -419,8 +419,9 @@ export default function Home() {
               {/* Révélation partielle visible — hook de curiosité */}
               <div className="mt-4 pt-4 border-t border-purple-500/20">
                 <p className="text-amber-200 text-[15px] leading-relaxed">
-                  ✦ {prenom}, votre message complet révèle {intention === 'amour' ? 'une vérité sur votre vie sentimentale que vous ressentez sans oser la formuler' : intention === 'carriere' ? 'ce qui bloque réellement votre évolution professionnelle depuis des mois' : intention === 'argent' ? 'la raison profonde pour laquelle l\'argent vous échappe en ce moment' : intention === 'blocage' ? 'l\'origine exacte du blocage qui vous empêche d\'avancer' : 'un tournant que vous n\'avez pas encore vu venir'}.{' '}
-                  <span className="text-amber-200/60">Il contient aussi une date précise à surveiller et...</span>
+                  ✦ La partie la plus importante de votre message n&apos;apparaît pas ici.{' '}
+                  {intention === 'amour' ? 'Ce que votre prénom révèle sur votre vie affective' : intention === 'carriere' ? 'Ce qui freine réellement votre évolution professionnelle' : intention === 'argent' ? 'La raison pour laquelle l\'argent vous échappe en ce moment' : intention === 'blocage' ? 'L\'origine du schéma qui revient sans cesse dans votre vie' : 'Ce que votre profil révèle sur le schéma qui se répète dans votre vie'} n&apos;est pas dans l&apos;aperçu gratuit.{' '}
+                  <span className="text-amber-200/60">Votre rapport complet contient aussi une date précise et...</span>
                 </p>
               </div>
 
@@ -435,11 +436,29 @@ export default function Home() {
               </div>
             </div>
 
-            {/* CTA Card — simplifié, direct */}
+            {/* CTA Card — Version 1 : frustration / révélation coupée */}
             <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20 mb-4">
-              <p className="text-gray-300 text-center text-[15px] mb-4">
-                Votre message fait <span className="text-white font-semibold">8 sections</span> et contient vos <span className="text-white font-semibold">dates clés</span>, vos <span className="text-white font-semibold">blocages cachés</span> et votre <span className="text-white font-semibold">guidance personnelle</span>.
+              <p className="text-white text-center font-semibold text-[16px] mb-3">
+                Votre rapport complet contient :
               </p>
+              <div className="flex flex-col gap-2 mb-4">
+                <div className="flex items-start gap-2">
+                  <span className="text-amber-400 text-sm mt-0.5">✦</span>
+                  <p className="text-gray-300 text-[14px]">Ce que votre prénom révèle vraiment sur vous</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-amber-400 text-sm mt-0.5">✦</span>
+                  <p className="text-gray-300 text-[14px]">Le schéma qui revient le plus souvent dans votre vie</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-amber-400 text-sm mt-0.5">✦</span>
+                  <p className="text-gray-300 text-[14px]">Le message central qui vous accompagne en ce moment</p>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-amber-400 text-sm mt-0.5">✦</span>
+                  <p className="text-gray-300 text-[14px]">Votre guidance personnalisée complète</p>
+                </div>
+              </div>
 
               <div className="text-center mb-3">
                 <span className="text-gray-400 line-through text-sm">{anchorPrice}</span>
@@ -449,11 +468,11 @@ export default function Home() {
 
               <button onClick={handlePaiement} disabled={payLoading}
                 className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
-                {payLoading ? '⏳ Redirection...' : `Lire mon message complet — ${displayPrice}`}
+                {payLoading ? '⏳ Redirection...' : `Débloquer mon message complet — ${displayPrice}`}
               </button>
-              <div className="flex items-center justify-center gap-4 mt-3 text-gray-400 text-xs">
+              <p className="text-gray-400 text-xs text-center mt-2">Lecture immédiate • Accès en quelques secondes</p>
+              <div className="flex items-center justify-center gap-4 mt-2 text-gray-400 text-xs">
                 <span>🔒 Paiement sécurisé</span>
-                <span>⚡ Résultat instantané</span>
                 <span>📧 Envoi par email</span>
               </div>
             </div>
