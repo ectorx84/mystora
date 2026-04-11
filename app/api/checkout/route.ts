@@ -29,6 +29,13 @@ const PAWAPAY_COUNTRIES: Record<string, { alpha3: string; currency: string; amou
   'SL': { alpha3: 'SLE', currency: 'SLE', amount: '45' },     // Sierra Leone — ~1,99€
   'UG': { alpha3: 'UGA', currency: 'UGX', amount: '7800' },   // Ouganda — ~1,99€
   'ZM': { alpha3: 'ZMB', currency: 'ZMW', amount: '55' },     // Zambie — ~1,99€
+  // Nouveaux pays — activés le 11/04/2026 (en attente confirmation PawaPay)
+  'BF': { alpha3: 'BFA', currency: 'XOF', amount: '1306' },   // Burkina Faso — taux fixe CFA
+  'GH': { alpha3: 'GHA', currency: 'GHS', amount: '32' },     // Ghana — ~1,99€
+  'NG': { alpha3: 'NGA', currency: 'NGN', amount: '3200' },   // Nigeria — ~1,99€
+  'TZ': { alpha3: 'TZA', currency: 'TZS', amount: '6050' },   // Tanzanie — ~1,99€
+  'MW': { alpha3: 'MWI', currency: 'MWK', amount: '3800' },   // Malawi — ~1,99€
+  'MZ': { alpha3: 'MOZ', currency: 'MZN', amount: '145' },    // Mozambique — ~1,99€
 };
 
 export async function POST(request: NextRequest) {
