@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { list } from '@vercel/blob';
 
 const SECRET = 'rjB_GiILOuCVfgHVtA0pIn3po8nk7tT0_t4ibMnVKbE';
+const BLOB_BASE = 'https://uw1afva6pwpbc7ln.public.blob.vercel-storage.com';
 
 export async function GET(request: NextRequest) {
   const secret = request.nextUrl.searchParams.get('secret');
@@ -8,78 +10,53 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  if (!process.env.PAWAPAY_API_TOKEN) {
-    return NextResponse.json({ error: 'PAWAPAY_API_TOKEN not configured' }, { status: 500 });
-  }
-
-  // Paramètres optionnels
-  const days = parseInt(request.nextUrl.searchParams.get('days') || '30');
-  const afterDate = new Date();
-  afterDate.setDate(afterDate.getDate() - days);
-
   try {
-    // Récupérer les dépôts via l'API PawaPay
-    const res = await fetch(
-      `https://api.pawapay.io/v1/deposits?createdAfter=${afterDate.toISOString()}`,
-      {
-        headers: {
-          'Authorization': `Bearer ${process.env.PAWAPAY_API_TOKEN}`,
-        },
-        cache: 'no-store',
-      }
-    );
+    // 1. Lister tous les blobs dans le dossier pawapay/
+    const { blobs } = await list({ prefix: 'pawapay/' });
 
-    if (!res.ok) {
-      const errText = await res.text();
-      return NextResponse.json(
-        { error: 'PawaPay API error', status: res.status, details: errText },
-        { status: 502 }
-      );
+    // 2. Récupérer le contenu de chaque blob (rapport PawaPay)
+    const deposits = [];
+    for (const blob of blobs) {
+      try {
+        const res = await fetch(blob.url, { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          deposits.push({
+            depositId: blob.pathname.replace('pawapay/', '').replace('.json', ''),
+            uploadedAt: blob.uploadedAt,
+            prenom: data.prenom || '',
+            email: data.email || '',
+            country: data.country || '',
+            status: data.status || 'completed',
+            partageId: data.partageId || '',
+            hasRapport: !!data.rapport,
+          });
+        }
+      } catch {
+        // Skip blobs qui ne sont pas du JSON valide
+      }
     }
 
-    const deposits = await res.json();
-
-    // Résumé
-    const completed = deposits.filter((d: any) => d.status === 'COMPLETED');
-    const failed = deposits.filter((d: any) => d.status === 'FAILED' || d.status === 'REJECTED');
-    const pending = deposits.filter((d: any) => !['COMPLETED', 'FAILED', 'REJECTED'].includes(d.status));
-
-    // Formater chaque dépôt
-    const formatted = deposits.map((d: any) => ({
-      depositId: d.depositId,
-      created: d.created,
-      status: d.status,
-      amount: d.amount,
-      currency: d.currency,
-      country: d.correspondent?.country || d.country || '',
-      correspondent: d.correspondent?.name || d.correspondentId || '',
-      failureReason: d.failureReason?.failureCode || null,
-      metadata: d.metadata || [],
-      // Extraire prénom des metadata
-      prenom: d.metadata?.find((m: any) => m.fieldName === 'prenom')?.fieldValue || '',
-    }));
-
-    // Trier par date décroissante
-    formatted.sort((a: any, b: any) => 
-      new Date(b.created).getTime() - new Date(a.created).getTime()
+    // 3. Trier par date décroissante
+    deposits.sort((a, b) =>
+      new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
     );
 
-    // Calculer le total en EUR (approximatif)
-    const totalXOF = completed
-      .filter((d: any) => d.currency === 'XOF' || d.currency === 'XAF')
-      .reduce((sum: number, d: any) => sum + parseFloat(d.amount || '0'), 0);
-    const totalEUR = totalXOF / 655.957; // Taux fixe CFA
+    // 4. Vérifier aussi les dépôts en échec via l'API PawaPay (si deposit IDs connus)
+    // PawaPay n'a pas de listing endpoint, on ne peut checker que par ID
+    // Les échecs ne créent pas de blob → on les track via les logs Vercel
+
+    // 5. Résumé
+    const totalCFA = deposits.length * 1306; // Montant fixe XAF/XOF
+    const totalEUR = Math.round((totalCFA / 655.957) * 100) / 100;
 
     return NextResponse.json({
-      period: `${days} derniers jours`,
       summary: {
-        total: deposits.length,
-        completed: completed.length,
-        failed: failed.length,
-        pending: pending.length,
-        totalEUR: Math.round(totalEUR * 100) / 100,
+        totalCompleted: deposits.length,
+        totalEUR,
+        totalCFA,
       },
-      deposits: formatted,
+      deposits,
     });
   } catch (err: any) {
     return NextResponse.json(
