@@ -1,10 +1,10 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest, NextResponse } from 'next/server';
+import Anthropic from '@anthropic-ai/sdk';
 import { put } from '@vercel/blob';
 
 const client = new Anthropic();
 
-// ============ VRAIS CALCULS (mêmes que dans /api/astro) ============
+// ============ CALCULS ASTRO (copiés depuis /api/rapport) ============
 
 function getZodiac(day: number, month: number) {
   const signs = [
@@ -99,41 +99,9 @@ function getCompatibleSigns(signName: string): string[] {
   return compat[signName] || [];
 }
 
-// ============ API ROUTE ============
+// ============ GÉNÉRATION RAPPORT ============
 
-export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { sessionId, prenom: fallbackPrenom, dateNaissance: fallbackDate } = body;
-  
-  if (!sessionId) {
-    return NextResponse.json({ error: 'Session manquante' }, { status: 400 });
-  }
-
-  // Vérifier le paiement Stripe
-  const stripe = new (await import('stripe')).default(process.env.STRIPE_SECRET_KEY!);
-  let session;
-  try {
-    session = await stripe.checkout.sessions.retrieve(sessionId);
-  } catch {
-    return NextResponse.json({ error: 'Session invalide' }, { status: 400 });
-  }
-
-  if (session.payment_status !== 'paid') {
-    return NextResponse.json({ error: 'Paiement non confirmé' }, { status: 403 });
-  }
-
-  // Récupérer les données depuis les metadata Stripe (source de vérité)
-  // Fallback : si metadata vides, accepter prenom/dateNaissance envoyés par le client
-  const prenom = session.metadata?.prenom || fallbackPrenom || '';
-  const dateNaissance = session.metadata?.dateNaissance || fallbackDate || '';
-  // Email : metadata > email Stripe checkout > vide
-  const email = session.metadata?.email || session.customer_details?.email || '';
-  const question = session.metadata?.question || '';
-
-  if (!prenom || !dateNaissance) {
-    return NextResponse.json({ error: 'Données incomplètes', needsInfo: true }, { status: 400 });
-  }
-
+async function generateRapport(prenom: string, dateNaissance: string, question: string) {
   const parts = dateNaissance.split('-');
   const year = parseInt(parts[0]);
   const month = parseInt(parts[1]);
@@ -213,62 +181,120 @@ Environ 800-1000 mots. Chaque section doit citer les vrais chiffres.`
     ]
   });
 
-  const texte = message.content[0].type === 'text' ? message.content[0].text : '';
+  return message.content[0].type === 'text' ? message.content[0].text : '';
+}
 
-  const id = Math.random().toString(36).substring(2, 10);
-  const dateCreation = new Date().toISOString();
+// ============ WEBHOOK PAWAPAY ============
 
-  const blob = await put(`rapports/${id}.json`, JSON.stringify({
-    id, prenom, dateNaissance, email: email || '', question: question || '', dateCreation, rapport: texte,
-  }), { access: 'public' });
+export async function POST(request: NextRequest) {
+  try {
+    const callback = await request.json();
 
-  // Envoi email automatique si disponible
-  if (email) {
-    fetch(`${process.env.NEXT_PUBLIC_URL}/api/send-rapport`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, prenom, rapport: texte, partageId: id }),
-    }).catch(() => {});
-  }
+    console.log(`[PAWAPAY_CALLBACK] ${JSON.stringify({
+      timestamp: new Date().toISOString(),
+      depositId: callback.depositId,
+      status: callback.status,
+      amount: callback.depositedAmount || callback.requestedAmount,
+      currency: callback.currency,
+      country: callback.country,
+    })}`);
 
-  // Tracking serveur — vente confirmée
-  const priceType = session.metadata?.priceType || 'standard';
-  const saleCountry = session.metadata?.country || 'unknown';
-  const saleAmount = session.amount_total ? `${(session.amount_total / 100).toFixed(2).replace('.', ',')}€` : '1,99€';
-  console.log(`[MYSTORA_EVENT] ${JSON.stringify({
-    timestamp: new Date().toISOString(),
-    event: 'checkout_complete',
-    prenom,
-    country: saleCountry,
-    priceType,
-    sessionId,
-  })}`);
+    // Seuls les paiements COMPLETED génèrent un rapport
+    if (callback.status !== 'COMPLETED') {
+      console.log(`[PAWAPAY_CALLBACK] Status ${callback.status} — pas de rapport généré`);
+      return NextResponse.json({ received: true });
+    }
 
-  // Marquer le contact comme acheteur dans Brevo (stoppe les relances)
-  if (email) {
-    fetch('https://api.brevo.com/v3/contacts', {
+    // Extraire les metadata
+    const metadata = callback.metadata || {};
+    const prenom = metadata.prenom || '';
+    const dateNaissance = metadata.dateNaissance || '';
+    const email = metadata.email || '';
+    const question = metadata.question || '';
+    const country = metadata.country || '';
+
+    if (!prenom || !dateNaissance) {
+      console.error('[PAWAPAY_CALLBACK] Metadata incomplètes — pas de rapport');
+      return NextResponse.json({ received: true, error: 'missing_metadata' });
+    }
+
+    // Générer le rapport
+    const texte = await generateRapport(prenom, dateNaissance, question);
+
+    // Stocker dans Vercel Blob
+    const id = Math.random().toString(36).substring(2, 10);
+    await put(`rapports/${id}.json`, JSON.stringify({
+      id,
+      prenom,
+      dateNaissance,
+      email,
+      question,
+      dateCreation: new Date().toISOString(),
+      rapport: texte,
+      provider: 'pawapay',
+      depositId: callback.depositId,
+    }), { access: 'public' });
+
+    // Stocker le mapping depositId → rapport pour /success
+    await put(`pawapay/${callback.depositId}.json`, JSON.stringify({
+      depositId: callback.depositId,
+      partageId: id,
+      prenom,
+      email,
+      rapport: texte,
+      status: 'completed',
+      createdAt: new Date().toISOString(),
+    }), { access: 'public' });
+
+    // Envoyer email si disponible
+    if (email) {
+      fetch(`${process.env.NEXT_PUBLIC_URL}/api/send-rapport`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, prenom, rapport: texte, partageId: id }),
+      }).catch(() => {});
+    }
+
+    // Marquer le contact comme acheteur dans Brevo (stoppe les relances)
+    if (email) {
+      fetch('https://api.brevo.com/v3/contacts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY! },
+        body: JSON.stringify({
+          email,
+          attributes: { PRENOM: prenom, ACHETE: true },
+          listIds: [2],
+          updateEnabled: true,
+        }),
+      }).catch(() => {});
+    }
+
+    // Notification admin — nouvelle vente PawaPay
+    fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY! },
       body: JSON.stringify({
-        email,
-        attributes: { PRENOM: prenom, ACHETE: true },
-        listIds: [2],
-        updateEnabled: true,
+        sender: { name: 'Mystora', email: 'contact@mystora.fr' },
+        to: [{ email: 'contact@mystora.fr' }],
+        subject: `💰 Vente PawaPay — ${prenom} (${country})`,
+        htmlContent: `<div style="font-family:Arial;padding:20px;"><h2>💰 Nouvelle vente Mobile Money</h2><p><strong>Client :</strong> ${prenom}</p><p><strong>Pays :</strong> ${country}</p><p><strong>Montant :</strong> ${callback.depositedAmount || callback.requestedAmount} ${callback.currency}</p><p><strong>Provider :</strong> PawaPay</p><p><strong>Deposit ID :</strong> ${callback.depositId}</p><p><strong>Heure :</strong> ${new Date().toLocaleString('fr-FR', { timeZone: 'America/Guadeloupe' })}</p></div>`,
       }),
     }).catch(() => {});
+
+    console.log(`[MYSTORA_EVENT] ${JSON.stringify({
+      timestamp: new Date().toISOString(),
+      event: 'pawapay_checkout_complete',
+      prenom,
+      country,
+      depositId: callback.depositId,
+      amount: callback.depositedAmount || callback.requestedAmount,
+      currency: callback.currency,
+    })}`);
+
+    return NextResponse.json({ received: true, rapportId: id });
+
+  } catch (error) {
+    console.error('[PAWAPAY_CALLBACK_ERROR]', error);
+    return NextResponse.json({ received: true, error: 'processing_error' }, { status: 200 });
   }
-
-  // Notification admin — nouvelle vente Stripe
-  fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'api-key': process.env.BREVO_API_KEY! },
-    body: JSON.stringify({
-      sender: { name: 'Mystora', email: 'contact@mystora.fr' },
-      to: [{ email: 'contact@mystora.fr' }],
-      subject: `💰 Mystora FR — Vente ${saleAmount} — ${prenom} (${saleCountry})`,
-      htmlContent: `<div style="font-family:Arial;padding:20px;"><h2>💰 Nouvelle vente — Mystora FR</h2><p><strong>Client :</strong> ${prenom}</p><p><strong>Email :</strong> ${email || 'non fourni'}</p><p><strong>Pays :</strong> ${saleCountry}</p><p><strong>Montant :</strong> ${saleAmount}</p><p><strong>Provider :</strong> Stripe</p><p><strong>Session ID :</strong> ${sessionId}</p><p><strong>Heure :</strong> ${new Date().toLocaleString('fr-FR', { timeZone: 'America/Guadeloupe' })}</p></div>`,
-    }),
-  }).catch(() => {});
-
-  return NextResponse.json({ resultat: texte, prenom, email, partageId: id, partageUrl: blob.url });
 }
