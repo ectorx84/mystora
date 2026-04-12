@@ -184,8 +184,8 @@ function SuccessContent() {
 
               {/* Prix */}
               <div className="mb-6">
-                <p className="text-gray-500 text-sm line-through mb-1">Prix habituel : 39,99€</p>
-                <p className="text-[#D4A574] text-4xl font-bold">19,99€</p>
+                <p className="text-gray-500 text-sm line-through mb-1">Prix habituel : 19,99€</p>
+                <p className="text-[#D4A574] text-4xl font-bold">9,99€</p>
                 <p className="text-gray-400 text-xs mt-1">Accès immédiat · Paiement sécurisé</p>
               </div>
 
