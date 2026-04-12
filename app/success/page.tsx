@@ -414,7 +414,7 @@ function SuccessContent() {
                       <p className="text-[#D4A574] font-semibold text-sm mb-2">Ce que vous recevez :</p>
                       <ul className="space-y-2 text-sm text-gray-300">
                         <li className="flex items-start gap-2"><span className="text-[#D4A574] mt-0.5">✦</span>Rapport approfondi — 12 révélations</li>
-                        <li className="flex items-start gap-2"><span className="text-[#D4A574] mt-0.5">✦</span>Narration vocale par Victoria (~15 min)</li>
+                        <li className="flex items-start gap-2"><span className="text-[#D4A574] mt-0.5">✦</span>Narration vocale — entre 10 et 15 min</li>
                         <li className="flex items-start gap-2"><span className="text-[#D4A574] mt-0.5">✦</span>Le message caché de vos astres</li>
                         <li className="flex items-start gap-2"><span className="text-[#D4A574] mt-0.5">✦</span>Envoyé par email · à réécouter quand vous voulez</li>
                       </ul>

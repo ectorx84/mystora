@@ -78,8 +78,8 @@ function SuccessVocalContent() {
           {audioUrl && (
             <div className="bg-gradient-to-b from-[#1a1245] to-[#0D0B2E] border border-[#D4A574]/30 rounded-2xl p-6 mb-8 text-center shadow-xl shadow-[#D4A574]/5">
               <div className="text-4xl mb-3">🎙️</div>
-              <p className="text-[#D4A574] font-semibold mb-1">Narration vocale par Victoria</p>
-              <p className="text-gray-400 text-sm mb-5">~15 minutes · Écouter avec des écouteurs pour une expérience optimale</p>
+              <p className="text-[#D4A574] font-semibold mb-1">Narration vocale</p>
+              <p className="text-gray-400 text-sm mb-5">Entre 10 et 15 minutes · Écouter avec des écouteurs pour une expérience optimale</p>
 
               <audio
                 controls
