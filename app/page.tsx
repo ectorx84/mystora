@@ -416,12 +416,13 @@ export default function Home() {
               </div>
               <div className="text-gray-200 text-[15px] leading-relaxed whitespace-pre-line">{resultat}</div>
 
-              {/* Révélation partielle visible — hook de curiosité */}
+              {/* Révélation V2 — question émotionnelle directe */}
               <div className="mt-4 pt-4 border-t border-purple-500/20">
-                <p className="text-amber-200 text-[15px] leading-relaxed">
-                  ✦ La partie la plus importante de votre message n&apos;apparaît pas ici.{' '}
-                  {intention === 'amour' ? 'Ce que votre prénom révèle sur votre vie affective' : intention === 'carriere' ? 'Ce qui freine réellement votre évolution professionnelle' : intention === 'argent' ? 'La raison pour laquelle l\'argent vous échappe en ce moment' : intention === 'blocage' ? 'L\'origine du schéma qui revient sans cesse dans votre vie' : 'Ce que votre profil révèle sur le schéma qui se répète dans votre vie'} n&apos;est pas dans l&apos;aperçu gratuit.{' '}
-                  <span className="text-amber-200/60">Votre rapport complet contient aussi une date précise et...</span>
+                <p className="text-amber-200 text-[16px] leading-relaxed font-medium">
+                  {intention === 'amour' ? `${prenom}, pourquoi vos relations finissent-elles toujours de la même façon ?` : intention === 'carriere' ? `${prenom}, pourquoi avez-vous l'impression de stagner malgré vos efforts ?` : intention === 'argent' ? `${prenom}, pourquoi l'argent semble-t-il toujours vous échapper au dernier moment ?` : intention === 'blocage' ? `${prenom}, pourquoi retombez-vous toujours dans le même schéma ?` : `${prenom}, pourquoi avez-vous l'impression de revivre toujours la même chose ?`}
+                </p>
+                <p className="text-gray-400 text-[14px] mt-2">
+                  Votre profil contient la réponse — et elle n&apos;est pas celle que vous croyez.
                 </p>
               </div>
 
@@ -436,27 +437,20 @@ export default function Home() {
               </div>
             </div>
 
-            {/* CTA Card — Version 1 : frustration / révélation coupée */}
+            {/* CTA Card — Version 2 : douleur émotionnelle / schéma répétitif */}
             <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20 mb-4">
-              <p className="text-white text-center font-semibold text-[16px] mb-3">
-                Votre rapport complet contient :
+              <p className="text-white text-center font-semibold text-[17px] mb-4">
+                Votre rapport complet révèle :
               </p>
-              <div className="flex flex-col gap-2 mb-4">
-                <div className="flex items-start gap-2">
-                  <span className="text-amber-400 text-sm mt-0.5">✦</span>
-                  <p className="text-gray-300 text-[14px]">Ce que votre prénom révèle vraiment sur vous</p>
+              <div className="flex flex-col gap-3 mb-4">
+                <div className="bg-[#0F0D2E]/60 rounded-xl p-3">
+                  <p className="text-gray-200 text-[14px]">🔁 <span className="text-amber-300">Le schéma invisible</span> qui se répète dans votre vie — et comment en sortir</p>
                 </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-amber-400 text-sm mt-0.5">✦</span>
-                  <p className="text-gray-300 text-[14px]">Le schéma qui revient le plus souvent dans votre vie</p>
+                <div className="bg-[#0F0D2E]/60 rounded-xl p-3">
+                  <p className="text-gray-200 text-[14px]">📅 <span className="text-amber-300">La date précise</span> d&apos;un tournant à venir dans les prochains mois</p>
                 </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-amber-400 text-sm mt-0.5">✦</span>
-                  <p className="text-gray-300 text-[14px]">Le message central qui vous accompagne en ce moment</p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <span className="text-amber-400 text-sm mt-0.5">✦</span>
-                  <p className="text-gray-300 text-[14px]">Votre guidance personnalisée complète</p>
+                <div className="bg-[#0F0D2E]/60 rounded-xl p-3">
+                  <p className="text-gray-200 text-[14px]">💡 <span className="text-amber-300">Ce que personne ne vous a dit</span> sur ce que votre prénom dit de vous</p>
                 </div>
               </div>
 
@@ -468,9 +462,9 @@ export default function Home() {
 
               <button onClick={handlePaiement} disabled={payLoading}
                 className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
-                {payLoading ? '⏳ Redirection...' : `Débloquer mon message complet — ${displayPrice}`}
+                {payLoading ? '⏳ Redirection...' : `Comprendre pourquoi — ${displayPrice}`}
               </button>
-              <p className="text-gray-400 text-xs text-center mt-2">Lecture immédiate • Accès en quelques secondes</p>
+              <p className="text-gray-400 text-xs text-center mt-2">La réponse est dans votre profil • Accès immédiat</p>
               <div className="flex items-center justify-center gap-4 mt-2 text-gray-400 text-xs">
                 <span>🔒 Paiement sécurisé</span>
                 <span>📧 Envoi par email</span>
