@@ -234,7 +234,7 @@ Environ 800-1000 mots. Chaque section doit citer les vrais chiffres.`
   // Tracking serveur — vente confirmée
   const priceType = session.metadata?.priceType || 'standard';
   const saleCountry = session.metadata?.country || 'unknown';
-  const saleAmount = session.amount_total ? `${(session.amount_total / 100).toFixed(2).replace('.', ',')}€` : '1,99€';
+  const saleAmount = session.amount_total ? `${(session.amount_total / 100).toFixed(2).replace('.', ',')}€` : '4,99€';
   console.log(`[MYSTORA_EVENT] ${JSON.stringify({
     timestamp: new Date().toISOString(),
     event: 'checkout_complete',

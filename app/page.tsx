@@ -51,8 +51,8 @@ export default function Home() {
   const [blocked, setBlocked] = useState(false);
   const [timeLeft, setTimeLeft] = useState('');
   const [emailSent, setEmailSent] = useState(false);
-  const [displayPrice, setDisplayPrice] = useState('1,99€');
-  const [anchorPrice, setAnchorPrice] = useState('5,90€');
+  const [displayPrice, setDisplayPrice] = useState('4,99€');
+  const [anchorPrice, setAnchorPrice] = useState('14,90€');
 
   useEffect(() => {
     fetch('/api/geo').then(r => r.json()).then(d => {
