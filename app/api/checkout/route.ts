@@ -109,8 +109,10 @@ export async function POST(request: NextRequest) {
   }
 
   // ====== ROUTE STRIPE — défaut (EU, Amérique du Nord, DOM-TOM + fallback) ======
-  // TEST 48-72h : 1,99€ pour tout le monde (était 4,99€ EU / 1,99€ Afrique)
-  const priceId = process.env.STRIPE_PRICE_ID_AFRICA || process.env.STRIPE_PRICE_ID!;
+  // 4,99€ EU/monde, 1,99€ Afrique (pays hors PawaPay ou fallback PawaPay KO)
+  const priceId = isAfrica
+    ? (process.env.STRIPE_PRICE_ID_AFRICA || process.env.STRIPE_PRICE_ID!)
+    : process.env.STRIPE_PRICE_ID!;
 
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ['card', 'link', 'paypal'],
