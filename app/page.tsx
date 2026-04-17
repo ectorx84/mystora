@@ -67,6 +67,14 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    const onPageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) setPayLoading(false);
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, []);
+
+  useEffect(() => {
     const lastTest = localStorage.getItem('mystora_last_test');
     if (lastTest) {
       const elapsed = Date.now() - parseInt(lastTest);
