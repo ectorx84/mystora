@@ -36,6 +36,8 @@ const LOADING_MESSAGES = [
   "Un message se révèle..."
 ];
 
+const MOIS_FR = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
 export default function Home() {
   const [prenom, setPrenom] = useState('');
   const [email, setEmail] = useState('');
@@ -118,6 +120,15 @@ export default function Home() {
 
   const dateNaissance = annee.length === 4 && mois.length === 2 && jour.length === 2
     ? `${annee}-${mois}-${jour}` : '';
+
+  const jourNum = parseInt(jour, 10);
+  const moisNum = parseInt(mois, 10);
+  const anneeNum = parseInt(annee, 10);
+  const dateValide = dateNaissance
+    && jourNum >= 1 && jourNum <= 31
+    && moisNum >= 1 && moisNum <= 12
+    && anneeNum >= 1900 && anneeNum <= new Date().getFullYear();
+  const dateLongue = dateValide ? `${jourNum} ${MOIS_FR[moisNum - 1]} ${anneeNum}` : '';
 
   const handleJour = (val: string) => {
     const clean = val.replace(/\D/g, '').slice(0, 2);
@@ -311,15 +322,23 @@ export default function Home() {
                     <input type="tel" inputMode="numeric" placeholder="JJ" value={jour}
                       onChange={(e) => handleJour(e.target.value)}
                       onBlur={handleJourBlur}
+                      autoComplete="off"
                       className="bg-[#0F0D2E] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-1/4 text-center text-lg font-semibold transition-colors" />
                     <input ref={moisRef} type="tel" inputMode="numeric" placeholder="MM" value={mois}
                       onChange={(e) => handleMois(e.target.value)}
                       onBlur={handleMoisBlur}
+                      autoComplete="off"
                       className="bg-[#0F0D2E] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-1/4 text-center text-lg font-semibold transition-colors" />
                     <input ref={anneeRef} type="tel" inputMode="numeric" placeholder="AAAA" value={annee}
                       onChange={(e) => handleAnnee(e.target.value)}
+                      autoComplete="off"
                       className="bg-[#0F0D2E] text-white placeholder-gray-600 rounded-xl px-3 py-3.5 outline-none border border-purple-700/40 focus:border-[#D4A574] w-2/4 text-center text-lg font-semibold transition-colors" />
                   </div>
+                  {dateLongue && (
+                    <p className="text-[#D4A574] text-sm px-1 mt-1 text-center font-medium">
+                      ✓ Vous êtes né·e le <span className="font-semibold">{dateLongue}</span> — vérifiez avant de continuer
+                    </p>
+                  )}
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-gray-400 text-sm px-1">Qu&apos;aimeriez-vous éclaircir ?</label>
