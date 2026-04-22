@@ -144,6 +144,7 @@ export async function POST(request: NextRequest) {
   const lifePath = getLifePath(day, month, year);
   const expression = getExpressionNumber(prenom);
   const soulUrge = getSoulUrge(prenom);
+  const birthDay = reduceToSingle(day);
   const personalYear = getPersonalYear(day, month);
   const personalMonth = getPersonalMonth(day, month);
   const compatible = getCompatibleSigns(zodiac.name);
@@ -157,8 +158,9 @@ export async function POST(request: NextRequest) {
 - Planète dominante : ${zodiac.planete}
 - Décan : ${decan.num}e décan (influence ${decan.influence})
 - Chemin de vie : ${lifePath}
-- Nombre d'expression (vibration du prénom) : ${expression}
-- Nombre intime (désir de l'âme) : ${soulUrge}
+- Nombre d'expression (vibration du prénom, toutes lettres) : ${expression}
+- Nombre intime (désir de l'âme, voyelles du prénom) : ${soulUrge}
+- Nombre du jour de naissance (jour ${day} réduit) : ${birthDay}
 - Année personnelle 2026 : ${personalYear}
 - Mois personnel actuel : ${personalMonth}
 - Signes les plus compatibles : ${compatible.join(', ')}`;
@@ -201,7 +203,7 @@ Génère un rapport complet pour ${prenom} en utilisant TOUTES les données ci-d
 
 1. Réponse à la question (si posée) — basée sur les données réelles
 2. Profil de personnalité (signe + décan + élément + planète)
-3. Numérologie : chemin de vie ${lifePath}, expression ${expression}, nombre intime ${soulUrge}
+3. Numérologie : chemin de vie ${lifePath}, expression ${expression}, nombre intime ${soulUrge}, nombre du jour ${birthDay} — précise bien que chemin/expression/intime/jour sont des nombres DISTINCTS, chacun sa source (date, toutes les lettres, voyelles, jour seul)
 4. Vie amoureuse (compatibilités réelles : ${compatible.join(', ')})
 5. Carrière et finances (basées sur chemin de vie et année personnelle)
 6. Année personnelle ${personalYear} — ce que ça signifie pour 2026
