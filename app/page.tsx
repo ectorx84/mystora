@@ -292,13 +292,13 @@ export default function Home() {
         ))}
       </div>
 
-      <div className="relative z-10 flex flex-col items-center px-4 py-8 min-h-screen justify-center">
+      <div className="relative z-10 flex flex-col items-center px-4 py-10 min-h-screen">
 
         {/* ===== FORM ===== */}
         {step === 'form' && (
-          <>
+          <div className="my-auto w-full flex flex-col items-center">
             <div className="text-center mb-6">
-              <div className="text-5xl mb-3">✦</div>
+              <div className="text-5xl mb-3 leading-none">✦</div>
               <h1 className="text-3xl font-bold text-white tracking-tight leading-tight">Un message<br/>vous attend</h1>
               <p className="text-shimmer text-base mt-3 font-medium">Découvrez-le en 30 secondes</p>
             </div>
@@ -406,7 +406,7 @@ export default function Home() {
               </div>
               <span>+2 400 profils générés ce mois</span>
             </div>
-          </>
+          </div>
         )}
 
         {/* ===== LOADING ===== */}
