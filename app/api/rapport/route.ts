@@ -272,5 +272,5 @@ Environ 800-1000 mots. Chaque section doit citer les vrais chiffres.`
     }),
   }).catch(() => {});
 
-  return NextResponse.json({ resultat: texte, prenom, email, partageId: id, partageUrl: blob.url });
+  return NextResponse.json({ resultat: texte, prenom, dateNaissance, email, partageId: id, partageUrl: blob.url });
 }

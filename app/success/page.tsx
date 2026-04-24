@@ -26,6 +26,7 @@ function SuccessContent() {
   const depositId = searchParams.get('deposit_id') || '';
   const [rapport, setRapport] = useState('');
   const [prenom, setPrenom] = useState('');
+  const [dateNaissance, setDateNaissance] = useState('');
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -74,6 +75,7 @@ function SuccessContent() {
           if (data.status === 'completed' && data.rapport) {
             setRapport(data.rapport);
             setPrenom(data.prenom || '');
+            setDateNaissance(data.dateNaissance || '');
             setEmail(data.email || '');
             setPartageId(data.partageId || '');
             setLoading(false);
@@ -142,6 +144,7 @@ function SuccessContent() {
         }
         setRapport(data.resultat);
         setPrenom(data.prenom || '');
+        setDateNaissance(data.dateNaissance || '');
         setEmail(data.email || '');
         setPartageId(data.partageId);
         setLoading(false);
@@ -204,11 +207,12 @@ function SuccessContent() {
 
   const accederGuidanceVocale = async () => {
     setUpsellLoading(true);
-    const dateNaissance = fbAnnee && fbMois && fbJour ? `${fbAnnee}-${fbMois}-${fbJour}` : '';
+    const fallbackDate = fbAnnee && fbMois && fbJour ? `${fbAnnee}-${fbMois}-${fbJour}` : '';
+    const finalDate = dateNaissance || fallbackDate;
     const res = await fetch('/api/checkout-upsell', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prenom, dateNaissance, email, partageId }),
+      body: JSON.stringify({ prenom, dateNaissance: finalDate, email, partageId }),
     });
     const data = await res.json();
     if (data.url) window.location.href = data.url;

@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
           status: 'completed',
           rapport: data.rapport,
           prenom: data.prenom,
+          dateNaissance: data.dateNaissance || '',
           email: data.email || '',
           partageId: data.partageId,
         });
