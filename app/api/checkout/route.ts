@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     ? (process.env.STRIPE_PRICE_ID_AFRICA || process.env.STRIPE_PRICE_ID!)
     : process.env.STRIPE_PRICE_ID!;
 
-  const session = await stripe.checkout.sessions.create({
+  const sessionParams: Stripe.Checkout.SessionCreateParams = {
     payment_method_types: ['card', 'link', 'paypal'],
     line_items: [
       {
@@ -123,6 +123,7 @@ export async function POST(request: NextRequest) {
       },
     ],
     mode: 'payment',
+    locale: 'fr',
     metadata: {
       prenom,
       dateNaissance,
@@ -131,9 +132,24 @@ export async function POST(request: NextRequest) {
       country,
       priceType: isAfrica ? 'africa' : 'standard',
     },
+    custom_text: {
+      submit: {
+        message: prenom
+          ? `Lecture complète de ${prenom} — disponible immédiatement après paiement.`
+          : 'Votre lecture complète sera disponible immédiatement après paiement.',
+      },
+    },
     success_url: `${process.env.NEXT_PUBLIC_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_URL}/`,
-  });
+    // Retour home avec flag pour reprendre (page peut relire localStorage)
+    cancel_url: `${process.env.NEXT_PUBLIC_URL}/?checkout=cancel`,
+  };
+
+  // Préremplir l'email Stripe → moins de friction + relance panier
+  if (email && typeof email === 'string' && email.includes('@')) {
+    sessionParams.customer_email = email.trim();
+  }
+
+  const session = await stripe.checkout.sessions.create(sessionParams);
 
   return NextResponse.json({ url: session.url, provider: 'stripe' });
 }

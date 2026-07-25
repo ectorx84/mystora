@@ -142,3 +142,22 @@ body {
   0%, 100% { background-position: 200% center; }
   50% { background-position: 0% center; }
 }
+
+/* ===== MOBILE: sticky CTA + safe-area iPhone ===== */
+.sticky-cta-safe {
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+}
+
+/* Alléger les nébuleuses sur petits écrans (perf mobile) */
+@media (max-width: 640px) {
+  .nebula {
+    filter: blur(50px);
+    opacity: 0.7;
+  }
+  .nebula-1,
+  .nebula-2,
+  .nebula-3 {
+    width: 280px;
+    height: 280px;
+  }
+}

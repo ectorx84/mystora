@@ -17,6 +17,17 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Mystora — Guidance personnalisée",
   description: "Découvre ce que les astres révèlent sur toi. Profil astrologique personnalisé, gratuit et immédiat.",
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+    "mobile-web-app-capable": "yes",
+  },
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#080613",
+  viewportFit: "cover" as const,
 };
 
 const GA_ID = 'G-BT1HX2V30M';

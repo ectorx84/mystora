@@ -53,6 +53,8 @@ export default function Home() {
   const [blocked, setBlocked] = useState(false);
   const [timeLeft, setTimeLeft] = useState('');
   const [emailSent, setEmailSent] = useState(false);
+  const [showAllAvis, setShowAllAvis] = useState(false);
+  const [emailError, setEmailError] = useState(false);
   const [displayPrice, setDisplayPrice] = useState('4,99€');
   const [anchorPrice, setAnchorPrice] = useState('14,90€');
 
@@ -66,6 +68,29 @@ export default function Home() {
     if (prenomParam) setPrenom(prenomParam.charAt(0).toUpperCase() + prenomParam.slice(1));
     // Track landing
     trackEvent('landing_view', { source: prenomParam ? 'manychat_or_brevo' : 'direct' });
+    // Retour depuis Stripe cancel → reprendre le teaser si dispo
+    if (params.get('checkout') === 'cancel') {
+      trackEvent('checkout_cancel_return');
+      const savedResult = localStorage.getItem('mystora_last_result');
+      const savedPrenom = localStorage.getItem('mystora_last_prenom');
+      const savedDate = localStorage.getItem('mystora_last_date');
+      const savedSigne = localStorage.getItem('mystora_last_signe');
+      if (savedResult && savedPrenom) {
+        setResultat(savedResult);
+        setPrenom(savedPrenom);
+        if (savedSigne) setSigneInfo(savedSigne);
+        if (savedDate) {
+          const parts = savedDate.split('-');
+          if (parts.length === 3) {
+            setAnnee(parts[0]);
+            setMois(parts[1]);
+            setJour(parts[2]);
+          }
+        }
+        setStep('result');
+        setBlocked(true);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -117,6 +142,10 @@ export default function Home() {
   const moisRef = useRef<HTMLInputElement>(null);
   const anneeRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const payCardRef = useRef<HTMLDivElement>(null);
+
+  const emailValide = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
   const dateNaissance = annee.length === 4 && mois.length === 2 && jour.length === 2
     ? `${annee}-${mois}-${jour}` : '';
@@ -204,8 +233,28 @@ export default function Home() {
   };
 
   const handlePaiement = async () => {
+    if (!emailValide) {
+      setEmailError(true);
+      payCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => emailInputRef.current?.focus(), 350);
+      trackEvent('cta_blocked_email');
+      return;
+    }
+    setEmailError(false);
     trackEvent('cta_click', { price: displayPrice });
     setPayLoading(true);
+    // Capturer l'email pour relance panier (même si pas encore abonné)
+    if (!emailSent) {
+      try {
+        fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email.trim(), prenom }),
+        }).catch(() => {});
+        setEmailSent(true);
+        trackEvent('email_submit', { source: 'before_payment' });
+      } catch {}
+    }
     try {
       const res = await fetch('/api/checkout', {
         method: 'POST',
@@ -213,6 +262,10 @@ export default function Home() {
         body: JSON.stringify({ prenom, dateNaissance, email: email.trim(), question: intention }),
       });
       const data = await res.json();
+      if (!data.url) {
+        setPayLoading(false);
+        return;
+      }
       trackEvent('checkout_start');
       window.location.href = data.url;
     } catch {
@@ -292,7 +345,7 @@ export default function Home() {
         ))}
       </div>
 
-      <div className="relative z-10 flex flex-col items-center px-4 py-10 min-h-screen">
+      <div className={`relative z-10 flex flex-col items-center px-4 py-6 min-h-screen ${step === 'result' ? 'pb-28' : ''}`}>
 
         {/* ===== FORM ===== */}
         {step === 'form' && (
@@ -400,9 +453,9 @@ export default function Home() {
             {/* Mini preuve sociale sous le formulaire */}
             <div className="mt-6 flex items-center gap-2 text-gray-400 text-sm">
               <div className="flex -space-x-2">
-                <div className="w-7 h-7 rounded-full bg-purple-700 flex items-center justify-center text-xs text-white border-2 border-[#0F0D2E]">S</div>
-                <div className="w-7 h-7 rounded-full bg-amber-600 flex items-center justify-center text-xs text-white border-2 border-[#0F0D2E]">K</div>
-                <div className="w-7 h-7 rounded-full bg-purple-500 flex items-center justify-center text-xs text-white border-2 border-[#0F0D2E]">F</div>
+                <div className="w-7 h-7 rounded-full bg-purple-700 flex items-center justify-center text-xs text-white border-2 border-[#0F0D2E]">L</div>
+                <div className="w-7 h-7 rounded-full bg-amber-600 flex items-center justify-center text-xs text-white border-2 border-[#0F0D2E]">T</div>
+                <div className="w-7 h-7 rounded-full bg-purple-500 flex items-center justify-center text-xs text-white border-2 border-[#0F0D2E]">A</div>
               </div>
               <span>+2 400 profils générés ce mois</span>
             </div>
@@ -431,121 +484,156 @@ export default function Home() {
         {/* ===== RESULT ===== */}
         {step === 'result' && (
           <div ref={resultRef} className="w-full max-w-md">
-            <div className="text-center mb-5">
-              <h1 className="text-3xl font-bold text-white">✦ Mystora</h1>
+            <div className="text-center mb-4">
+              <h1 className="text-2xl font-bold text-white">✦ Mystora</h1>
             </div>
 
             {/* Résultat gratuit */}
-            <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-6 shadow-2xl border border-purple-500/10 mb-4">
+            <div className="bg-[#1A1747]/80 backdrop-blur-sm rounded-3xl p-5 shadow-2xl border border-purple-500/10 mb-3">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xl">✨</span>
-                <h2 className="text-white text-lg font-semibold">{prenom}, voici votre message</h2>
+                <h2 className="text-white text-base font-semibold">{prenom}, voici votre message</h2>
               </div>
               <div className="text-gray-200 text-[15px] leading-relaxed whitespace-pre-line">{resultat}</div>
 
               {/* Révélation partielle visible — hook de curiosité */}
-              <div className="mt-4 pt-4 border-t border-purple-500/20">
-                <p className="text-amber-200 text-[15px] leading-relaxed">
+              <div className="mt-3 pt-3 border-t border-purple-500/20">
+                <p className="text-amber-200 text-[14px] leading-relaxed">
                   ✦ {prenom}, votre message complet révèle {intention === 'amour' ? 'une vérité sur votre vie sentimentale que vous ressentez sans oser la formuler' : intention === 'carriere' ? 'ce qui bloque réellement votre évolution professionnelle depuis des mois' : intention === 'argent' ? 'la raison profonde pour laquelle l\'argent vous échappe en ce moment' : intention === 'blocage' ? 'l\'origine exacte du blocage qui vous empêche d\'avancer' : 'un tournant que vous n\'avez pas encore vu venir'}.{' '}
                   <span className="text-amber-200/60">Il contient aussi une date précise à surveiller et...</span>
                 </p>
               </div>
 
-              {/* Blurred content — personnalisé */}
-              <div className="relative mt-3">
-                <div className="text-gray-300 text-[15px] leading-relaxed blur-[6px] select-none pointer-events-none" aria-hidden="true">
-                  <p className="mb-2">{prenom}, {signeInfo ? `en tant que ${signeInfo}, ` : ''}votre profil révèle que la période actuelle est un tournant décisif. Ce que vous ressentez en ce moment — cette tension entre ce que vous voulez et ce que vous vivez — a une explication précise dans votre thème.</p>
-                  <p className="mb-2">{intention === 'amour' ? 'Votre vie amoureuse est sur le point de basculer. La personne à laquelle vous pensez' : intention === 'carriere' ? 'Professionnellement, un changement majeur se prépare. L\'opportunité que vous attendez' : intention === 'argent' ? 'Financièrement, un déblocage est imminent. Le schéma qui vous retient' : intention === 'blocage' ? 'Le blocage que vous ressentez a une origine que vous n\'avez jamais envisagée' : 'Une rencontre ou un événement va tout changer dans les prochaines semaines'}. Les dates clés à surveiller sont le...</p>
-                  <p>Votre guidance personnelle indique trois actions concrètes à poser dès maintenant pour...</p>
+              {/* Blurred content — compact mobile */}
+              <div className="relative mt-2 max-h-20 overflow-hidden">
+                <div className="text-gray-300 text-[14px] leading-relaxed blur-[5px] select-none pointer-events-none" aria-hidden="true">
+                  <p>{prenom}, {signeInfo ? `en tant que ${signeInfo}, ` : ''}votre profil révèle que la période actuelle est un tournant décisif...</p>
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#1A1747]/50 to-[#1A1747]" />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#1A1747]" />
               </div>
             </div>
 
-            {/* CTA Card — simplifié, direct */}
-            <div className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-6 border border-amber-400/20 mb-4">
-              <p className="text-gray-300 text-center text-[15px] mb-4">
-                Votre message fait <span className="text-white font-semibold">8 sections</span> et contient vos <span className="text-white font-semibold">dates clés</span>, vos <span className="text-white font-semibold">blocages cachés</span> et votre <span className="text-white font-semibold">guidance personnelle</span>.
+            {/* Mini preuve sociale 1 avis */}
+            <div className="mb-3 bg-[#1A1747]/60 rounded-2xl p-3.5 border border-purple-500/10">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-amber-400 text-xs">★★★★★</span>
+                <span className="text-white text-sm font-medium">Léa M.</span>
+                <span className="text-gray-500 text-xs">· Amour</span>
+              </div>
+              <p className="text-gray-300 text-[13px] leading-relaxed">&quot;J&apos;ai failli fermer la page. La partie gratuite parlait d&apos;une situation que je n&apos;avais dite à personne. J&apos;ai débloqué en 10 secondes — {displayPrice} bien investis.&quot;</p>
+            </div>
+
+            {/* CTA Card — email obligatoire + paiement */}
+            <div ref={payCardRef} className="bg-gradient-to-br from-purple-900/60 to-[#1A1747]/80 rounded-3xl p-5 border border-amber-400/20 mb-3">
+              <p className="text-gray-300 text-center text-[14px] mb-3 leading-snug">
+                <span className="text-white font-semibold">8 sections</span>
+                {' · '}dates clés
+                {' · '}blocages
+                {' · '}guidance perso
               </p>
 
               <div className="text-center mb-3">
-                <span className="text-gray-400 line-through text-sm">{anchorPrice}</span>
-                <span className="text-amber-400 font-bold text-xl ml-2">{displayPrice}</span>
-                <span className="text-amber-300/70 text-xs ml-2">offre de lancement</span>
+                <span className="text-amber-400 font-bold text-2xl">{displayPrice}</span>
+                <span className="text-amber-300/70 text-xs ml-2">paiement unique</span>
               </div>
 
+              <label className="block text-gray-400 text-xs mb-1.5 px-0.5">
+                Email pour recevoir votre lecture complète
+              </label>
+              <input
+                ref={emailInputRef}
+                type="email"
+                placeholder="votre@email.com"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (emailError) setEmailError(false);
+                }}
+                className={`w-full bg-[#0F0D2E] text-white placeholder-gray-500 rounded-xl px-4 py-3.5 outline-none border transition-colors text-base mb-1 ${
+                  emailError
+                    ? 'border-red-500/80 focus:border-red-400'
+                    : 'border-purple-700/40 focus:border-[#D4A574]'
+                }`}
+                autoComplete="email"
+                inputMode="email"
+              />
+              {emailError ? (
+                <p className="text-red-400 text-xs mb-3 px-0.5">Entrez un email valide pour recevoir votre lecture</p>
+              ) : (
+                <p className="text-gray-500 text-[11px] mb-3 px-0.5">Lecture immédiate à l&apos;écran + envoi par email. Pas d&apos;abonnement.</p>
+              )}
+
               <button onClick={handlePaiement} disabled={payLoading}
-                className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-lg transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50">
+                className="block w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-4 rounded-xl text-center text-base transition-all duration-300 shadow-lg shadow-amber-900/30 disabled:opacity-50 active:scale-[0.98]">
                 {payLoading ? '⏳ Redirection...' : `Lire mon message complet — ${displayPrice}`}
               </button>
-              <div className="flex items-center justify-center gap-4 mt-3 text-gray-400 text-xs">
-                <span>🔒 Paiement sécurisé</span>
-                <span>⚡ Résultat instantané</span>
-                <span>📧 Envoi par email</span>
+              <div className="flex items-center justify-center gap-3 mt-2.5 text-gray-400 text-[11px]">
+                <span>🔒 Sécurisé</span>
+                <span>⚡ Instantané</span>
+                <span>💳 Carte · PayPal</span>
               </div>
             </div>
 
-            {/* Email capture — filet de rattrapage */}
-            {!emailSent ? (
-              <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
-                <p className="text-gray-400 text-sm text-center mb-3">Pas encore prêt(e) ? Recevez votre message par email</p>
-                <div className="flex gap-2">
-                  <input
-                    type="email"
-                    placeholder="Votre email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="flex-1 bg-[#0F0D2E] text-white placeholder-gray-500 rounded-xl px-4 py-3 outline-none border border-purple-700/40 focus:border-[#D4A574] transition-colors text-sm"
-                    autoComplete="email"
-                  />
-                  <button onClick={handleEmailSubmit}
-                    disabled={!email.trim()}
-                    className="bg-purple-700 hover:bg-purple-600 disabled:bg-gray-700 text-white font-semibold px-4 py-3 rounded-xl transition-colors text-sm disabled:opacity-50">
-                    OK
-                  </button>
+            {/* Avis supplémentaires — repliés par défaut (mobile) */}
+            <div className="mb-3">
+              {!showAllAvis ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAllAvis(true)}
+                  className="w-full text-center text-purple-300/80 text-sm py-2 hover:text-purple-200 transition-colors"
+                >
+                  Voir 2 autres avis ★★★★★
+                </button>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  <p className="text-gray-400 text-xs text-center">Ils hésitaient aussi</p>
+                  <div className="bg-[#1A1747]/60 rounded-2xl p-3.5 border border-purple-500/10">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-amber-400 text-xs">★★★★★</span>
+                      <span className="text-white text-sm font-medium">Thomas R.</span>
+                      <span className="text-gray-500 text-xs">· Carrière</span>
+                    </div>
+                    <p className="text-gray-300 text-[13px] leading-relaxed">&quot;Je pensais à du blabla. Puis la partie carrière : EXACTEMENT mon frein depuis des mois. J&apos;ai envoyé à ma sœur. Ça m&apos;a scotché.&quot;</p>
+                  </div>
+                  <div className="bg-[#1A1747]/60 rounded-2xl p-3.5 border border-purple-500/10">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-amber-400 text-xs">★★★★★</span>
+                      <span className="text-white text-sm font-medium">Amina K.</span>
+                      <span className="text-gray-500 text-xs">· Blocage</span>
+                    </div>
+                    <p className="text-gray-300 text-[13px] leading-relaxed">&quot;J&apos;avais déjà payé 50€ pour du flou. Ici en 2 minutes : mon message, mon blocage, quoi faire. J&apos;aurais dû le faire plus tôt.&quot;</p>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="bg-[#1A1747]/60 rounded-2xl p-3 border border-purple-500/10 text-center">
-                <p className="text-[#D4A574] text-sm">✅ C&apos;est noté ! Vous recevrez votre lecture à {email}</p>
-              </div>
-            )}
-
-            {/* Avis clients */}
-            <div className="mt-4 flex flex-col gap-3">
-              <p className="text-gray-400 text-xs text-center">Ce qu&apos;ils en disent</p>
-              <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-amber-400 text-sm">★★★★★</span>
-                  <span className="text-white text-sm font-medium">Sarah M.</span>
-                </div>
-                <p className="text-gray-300 text-sm leading-relaxed">&quot;J&apos;ai eu des frissons en lisant mon message. Il décrit exactement ce que je traverse en ce moment. C&apos;était tellement précis que j&apos;en suis restée bouche bée.&quot;</p>
-              </div>
-              <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-amber-400 text-sm">★★★★★</span>
-                  <span className="text-white text-sm font-medium">Karim L.</span>
-                </div>
-                <p className="text-gray-300 text-sm leading-relaxed">&quot;Au début je pensais que c&apos;était du blabla mais quand j&apos;ai lu la partie sur ma carrière... tout colle. J&apos;ai même partagé avec ma copine.&quot;</p>
-              </div>
-              <div className="bg-[#1A1747]/60 rounded-2xl p-4 border border-purple-500/10">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-amber-400 text-sm">★★★★★</span>
-                  <span className="text-white text-sm font-medium">Fatou D.</span>
-                </div>
-                <p className="text-gray-300 text-sm leading-relaxed">&quot;{displayPrice} pour un message aussi personnel c&apos;est donné. On m&apos;a déjà fait payer 50€ pour quelque chose de moins précis. Je recommande à 100%.&quot;</p>
-              </div>
+              )}
             </div>
 
             <button onClick={() => { setStep('form'); setResultat(''); }}
-              className="w-full text-gray-500 text-sm mt-4 py-2 hover:text-gray-300 transition-colors text-center">
+              className="w-full text-gray-500 text-sm mt-2 py-2 hover:text-gray-300 transition-colors text-center">
               ← Nouveau message
             </button>
           </div>
         )}
 
-        <p className="text-gray-600 text-xs mt-8">Contenu de divertissement — mystora.fr · <a href="/mentions-legales" className="underline hover:text-gray-400">Mentions légales</a></p>
+        <p className={`text-gray-600 text-xs mt-6 ${step === 'result' ? 'mb-2' : ''}`}>Contenu de divertissement — mystora.fr · <a href="/mentions-legales" className="underline hover:text-gray-400">Mentions légales</a></p>
       </div>
+
+      {/* Sticky CTA mobile — toujours visible sur paywall */}
+      {step === 'result' && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-amber-400/20 bg-[#0F0D2E]/95 backdrop-blur-md sticky-cta-safe">
+          <div className="max-w-md mx-auto px-4 pt-2.5 pb-2">
+            <button
+              onClick={handlePaiement}
+              disabled={payLoading}
+              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold py-3.5 rounded-xl text-center text-[15px] shadow-lg shadow-amber-900/40 disabled:opacity-50 active:scale-[0.98] transition-all"
+            >
+              {payLoading ? '⏳ Redirection...' : `Débloquer mon message — ${displayPrice}`}
+            </button>
+            <p className="text-center text-gray-500 text-[10px] mt-1">
+              Paiement unique · Pas d&apos;abonnement · {emailValide ? '✓ Email prêt' : 'Email requis ci-dessus'}
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
